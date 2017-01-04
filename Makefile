@@ -1,4 +1,7 @@
-MODULE = tron
+SUBNAME = tron
+LIB = smartmet-$(SUBNAME)
+SPEC = smartmet-library-$(SUBNAME)
+INCDIR = smartmet/$(SUBNAME)
 
 FLAGS = -std=c++0x -fPIC -MD -Wall -W -Wno-unused-parameter -Wno-variadic-macros
 
@@ -58,18 +61,13 @@ else
 endif
 
 bindir = $(PREFIX)/bin
-includedir = $(PREFIX)/include/smartmet
+includedir = $(PREFIX)/include
 datadir = $(PREFIX)/share
 objdir = obj
 
 # rpm variables
 
 rpmsourcedir=/tmp/$(shell whoami)/rpmbuild
-
-rpmerr = "There's no spec file ($(specfile)). RPM wasn't created. Please make a spec file or copy and rename it into $(specfile)"
-
-rpmversion := $(shell grep "^Version:" $(MODULE).spec  | cut -d\  -f 2 | tr . _)
-rpmrelease := $(shell grep "^Release:" $(MODULE).spec  | cut -d\  -f 2 | tr . _)
 
 rpmexcludevcs := $(shell tar --help | grep -m 1 -o -- '--exclude-vcs')
 
@@ -81,7 +79,7 @@ vpath %.o obj
 
 # How to install
 
-LIBFILE = libsmartmet_$(MODULE).a
+LIBFILE = lib$(LIB).a
 
 INSTALL_PROG = install -m 775
 INSTALL_DATA = install -m 664
@@ -112,12 +110,12 @@ clean:
 	rm -rf obj
 
 install:
-	@mkdir -p $(includedir)/$(MODULE)
+	@mkdir -p $(includedir)/$(INCDIR)
 	@list='$(HDRS)'; \
 	for hdr in $$list; do \
 	  HDR=$$(basename $$hdr); \
-	  echo $(INSTALL_DATA) $$hdr $(includedir)/$(MODULE)/$$HDR; \
-	  $(INSTALL_DATA) $$hdr $(includedir)/$(MODULE)/$$HDR; \
+	  echo $(INSTALL_DATA) $$hdr $(includedir)/$(INCDIR)/$$HDR; \
+	  $(INSTALL_DATA) $$hdr $(includedir)/$(INCDIR)/$$HDR; \
 	done
 	@mkdir -p $(libdir)
 	$(INSTALL_PROG) $(LIBFILE) $(libdir)/$(LIBFILE)
@@ -129,21 +127,17 @@ objdir:
 	@mkdir -p obj
 
 rpm: clean
-	if [ -e $(MODULE).spec ]; \
+	if [ -e $(SPEC).spec ]; \
 	then \
-	  smartspecupdate $(MODULE).spec ; \
+	  smartspecupdate $(SPEC).spec ; \
 	  mkdir -p $(rpmsourcedir) ; \
-	  tar $(rpmexcludevcs) -C ../ -cf $(rpmsourcedir)/libsmartmet-$(MODULE).tar $(MODULE) ; \
-	  gzip -f $(rpmsourcedir)/libsmartmet-$(MODULE).tar ; \
-	  TAR_OPTIONS=--wildcards rpmbuild -v -ta $(rpmsourcedir)/libsmartmet-$(MODULE).tar.gz ; \
-	  rm -f $(rpmsourcedir)/libsmartmet-$(MODULE).tar.gz ; \
+	  tar $(rpmexcludevcs) -C ../ -cf $(rpmsourcedir)/$(SPEC).tar $(SUBNAME) ; \
+	  gzip -f $(rpmsourcedir)/$(SPEC).tar ; \
+	  TAR_OPTIONS=--wildcards rpmbuild -v -ta $(rpmsourcedir)/$(SPEC).tar.gz ; \
+	  rm -f $(rpmsourcedir)/$(SPEC).tar.gz ; \
 	else \
-	  echo $(rpmerr); \
+	  echo $(SPEC).spec file missing; \
 	fi;
-
-tag:
-	cvs -f tag 'smartmet_$(MODULE)_$(rpmversion)-$(rpmrelease)' .
-
 
 .SUFFIXES: $(SUFFIXES) .cpp
 
