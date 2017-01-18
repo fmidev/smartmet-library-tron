@@ -246,16 +246,22 @@ long pick_best_match(const Polylines &polylines,
     // No best pick if the edge is already taken. Could happen with polylines, not with polygons.
     if (targets[pos] < 0) return pos;
 
-    if (targets[pos] >= polylines.size())
-      throw std::runtime_error(
-          "Internal error trying to build a valid geometry, target polygon number overflow");
 #if 0
     std::cout << "Targets size = " << targets.size() << "\tpos = " << pos
               << "\t targets[pos] = " << targets[pos] << "\tnpolylines = " << polylines.size()
               << std::endl;
 #endif
 
-    if (polylines[targets[pos]].closed()) return -1;
+    if (targets[pos] == polylineindex)
+      *self_touch = true;
+
+    else if (targets[pos] >= polylines.size())
+      throw std::runtime_error(
+          "Internal error trying to build a valid geometry, target polygon number overflow");
+
+    else if (polylines[targets[pos]].closed())
+      return -1;
+
     // There is a previous polyline we can extend.
     return pos;
   }

@@ -15,7 +15,7 @@ DIFFICULTFLAGS = -Weffc++ -Wunreachable-code -Wredundant-decls
 CC = g++
 CFLAGS = -DUNIX -O0 -g $(MAINFLAGS)
 INCLUDES = -I ../include -I /usr/include/smartmet
-LIBS = -L .. -lsmartmet_tron -lsmartmet_gis -lgeos
+LIBS = -L .. -lsmartmet-tron -lsmartmet-gis -lgeos
 
 all: $(PROG)
 clean:
@@ -27,6 +27,6 @@ test: $(PROG)
 	./$$prog; \
 	done
 
-$(PROG) : % : %.cpp ../libsmartmet_tron.a $(INCS)
+$(PROG) : % : %.cpp ../libsmartmet-tron.a $(INCS)
 	$(CC) $(CFLAGS) -o $@ $@.cpp $(INCLUDES) $(LIBS)
 
