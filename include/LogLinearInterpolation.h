@@ -1,6 +1,6 @@
 // ======================================================================
 /*
- * LogLinear interpolation inside grid cells to
+ * Linear interpolation inside grid cells to
  * find contour line intersection coordinates.
  *
  */
@@ -18,6 +18,18 @@
 
 namespace Tron
 {
+// Push only if the last coordinate is not already there
+template <typename T, typename C>
+static void unique_push_log(std::vector<T>& x, std::vector<T>& y, C xnext, C ynext)
+{
+  std::size_t n = x.size() - 1;
+  if (x.empty() || x[n] != xnext || y[n] != ynext)
+  {
+    x.push_back(xnext);
+    y.push_back(ynext);
+  }
+}
+
 template <typename Traits>
 class LogLinearInterpolation : public Traits
 {
@@ -51,11 +63,17 @@ class LogLinearInterpolation : public Traits
                         coord_type& x,
                         coord_type& y)
   {
-    // This test is absolutely necessary for handling value==lolimit cases
-    if (z1 == z2)
+    // These equality tests are absolutely necessary for handling value==lolimit cases
+    // without any rounding errors!
+    if (z1 == value)
     {
       x = x1;
       y = y1;
+    }
+    else if (z2 == value)
+    {
+      x = x2;
+      y = y2;
     }
     else if (z1 < 0 || z2 < 0 || value < 0)
     {
@@ -95,22 +113,45 @@ class LogLinearInterpolation : public Traits
 
   static place_type placement(value_type value, value_type limit)
   {
-    if (value < limit && !LogLinearInterpolation::missing(limit)) return Below;
-    if (value > limit && !LogLinearInterpolation::missing(limit)) return Above;
-    return Inside;
+    if (value <= limit && !LogLinearInterpolation::missing(limit)) return Below;
+    return Above;
   }
 
-  // Connect intersections found in a triangle.
+  // Produce a line
 
-  static void addedges(const std::vector<coord_type>& x,
-                       const std::vector<coord_type>& y,
-                       MyFlipSet& flipset)
+  static void flush_line(std::vector<coord_type>& x, std::vector<coord_type>& y, MyFlipSet& flipset)
   {
-    for (unsigned int i = 0; i < x.size(); i++)
+    if (x.size() == 2)
     {
-      unsigned int j = (i + 1) % x.size();
-      flipset.eflip(MyEdge(x[i], y[i], x[j], y[j]));
+      flipset.eflip(MyEdge(x[0], y[0], x[1], y[1]));
+      x.clear();
+      y.clear();
     }
+    else
+      throw std::runtime_error(
+          "Invalid polyline, expecting 2 coordinates for a line segment inside a grid cell");
+  }
+
+  // NOTE: Always produce clockwise areas, assuming input is clockwise!!
+  // That makes the polygons valid for OGC and eases building the
+  // polygons from the results
+
+  // Connect intersections found from a triangle or rectangle
+
+  static void flush_polygon(std::vector<coord_type>& x,
+                            std::vector<coord_type>& y,
+                            MyFlipSet& flipset)
+  {
+    if (x.size() > 2)
+    {
+      for (unsigned int i = 0; i < x.size(); i++)
+      {
+        unsigned int j = (i + 1) % x.size();
+        flipset.eflip(MyEdge(x[i], y[i], x[j], y[j]));
+      }
+    }
+    x.clear();
+    y.clear();
   }
 
   static void intersect(std::vector<coord_type>& x,
@@ -137,20 +178,16 @@ class LogLinearInterpolation : public Traits
       {
         // Below Inside
         intersect(x1, y1, z1, x2, y2, z2, lo, X, Y);
-        x.push_back(X);
-        y.push_back(Y);
-        x.push_back(x2);
-        y.push_back(y2);
+        unique_push_log(x, y, X, Y);
+        unique_push_log(x, y, x2, y2);
       }
       else
       {
         // Below Above
         intersect(x1, y1, z1, x2, y2, z2, lo, X, Y);
-        x.push_back(X);
-        y.push_back(Y);
+        unique_push_log(x, y, X, Y);
         intersect(x1, y1, z1, x2, y2, z2, hi, X, Y);
-        x.push_back(X);
-        y.push_back(Y);
+        unique_push_log(x, y, X, Y);
       }
     }
     else if (c1 == Inside)
@@ -159,27 +196,21 @@ class LogLinearInterpolation : public Traits
       {
         // Inside Below
         intersect(x1, y1, z1, x2, y2, z2, lo, X, Y);
-        x.push_back(x1);
-        y.push_back(y1);
-        x.push_back(X);
-        y.push_back(Y);
+        unique_push_log(x, y, x1, y1);
+        unique_push_log(x, y, X, Y);
       }
       else if (c2 == Inside)
       {
         // Inside Inside
-        x.push_back(x1);
-        y.push_back(y1);
-        x.push_back(x2);
-        y.push_back(y2);
+        unique_push_log(x, y, x1, y1);
+        unique_push_log(x, y, x2, y2);
       }
       else
       {
         // Inside Above
         intersect(x1, y1, z1, x2, y2, z2, hi, X, Y);
-        x.push_back(x1);
-        y.push_back(y1);
-        x.push_back(X);
-        y.push_back(Y);
+        unique_push_log(x, y, x1, y1);
+        unique_push_log(x, y, X, Y);
       }
     }
     else
@@ -188,20 +219,16 @@ class LogLinearInterpolation : public Traits
       {
         // Above Below
         intersect(x1, y1, z1, x2, y2, z2, hi, X, Y);
-        x.push_back(X);
-        y.push_back(Y);
+        unique_push_log(x, y, X, Y);
         intersect(x1, y1, z1, x2, y2, z2, lo, X, Y);
-        x.push_back(X);
-        y.push_back(Y);
+        unique_push_log(x, y, X, Y);
       }
       else if (c2 == Inside)
       {
         // Above Inside
         intersect(x1, y1, z1, x2, y2, z2, hi, X, Y);
-        x.push_back(X);
-        y.push_back(Y);
-        x.push_back(x2);
-        y.push_back(y2);
+        unique_push_log(x, y, X, Y);
+        unique_push_log(x, y, x2, y2);
       }
       else
       {
@@ -273,9 +300,9 @@ class LogLinearInterpolation : public Traits
 
     intersect(x1, y1, z1, x3, y3, z3, lo, X1, Y1);
     intersect(x2, y2, z2, x3, y3, z3, lo, X2, Y2);
-    flipset.eflip(MyEdge(X1, Y1, x3, y3));
-    flipset.eflip(MyEdge(x3, y3, X2, Y2));
-    flipset.eflip(MyEdge(X2, Y2, X1, Y1));
+    flipset.eflip(MyEdge(X1, Y1, X2, Y2));
+    flipset.eflip(MyEdge(X2, Y2, x3, y3));
+    flipset.eflip(MyEdge(x3, y3, X1, Y1));
   }
 
   // Below Below Above
@@ -298,10 +325,10 @@ class LogLinearInterpolation : public Traits
     intersect(x1, y1, z1, x3, y3, z3, hi, X2, Y2);
     intersect(x2, y2, z2, x3, y3, z3, hi, X3, Y3);
     intersect(x2, y2, z2, x3, y3, z3, lo, X4, Y4);
-    flipset.eflip(MyEdge(X1, Y1, X2, Y2));
-    flipset.eflip(MyEdge(X2, Y2, X3, Y3));
-    flipset.eflip(MyEdge(X3, Y3, X4, Y4));
-    flipset.eflip(MyEdge(X4, Y4, X1, Y1));
+    flipset.eflip(MyEdge(X1, Y1, X4, Y4));
+    flipset.eflip(MyEdge(X4, Y4, X3, Y3));
+    flipset.eflip(MyEdge(X3, Y3, X2, Y2));
+    flipset.eflip(MyEdge(X2, Y2, X1, Y1));
   }
 
   // Below Inside Inside
@@ -355,6 +382,33 @@ class LogLinearInterpolation : public Traits
     flipset.eflip(MyEdge(X4, Y4, X1, Y1));
   }
 
+  // Below Above Inside
+  static void triangle_BAI(coord_type x1,
+                           coord_type y1,
+                           value_type z1,
+                           coord_type x2,
+                           coord_type y2,
+                           value_type z2,
+                           coord_type x3,
+                           coord_type y3,
+                           value_type z3,
+                           value_type lo,
+                           value_type hi,
+                           MyFlipSet& flipset)
+  {
+    coord_type X1, Y1, X2, Y2, X3, Y3, X4, Y4;
+
+    intersect(x1, y1, z1, x2, y2, z2, lo, X1, Y1);
+    intersect(x1, y1, z1, x2, y2, z2, hi, X2, Y2);
+    intersect(x2, y2, z2, x3, y3, z3, hi, X3, Y3);
+    intersect(x1, y1, z1, x3, y3, z3, lo, X4, Y4);
+    flipset.eflip(MyEdge(X1, Y1, X2, Y2));
+    flipset.eflip(MyEdge(X2, Y2, X3, Y3));
+    flipset.eflip(MyEdge(X3, Y3, x3, y3));
+    flipset.eflip(MyEdge(x3, y3, X4, Y4));
+    flipset.eflip(MyEdge(X4, Y4, X1, Y1));
+  }
+
   // Below Above Above
   static void triangle_BAA(coord_type x1,
                            coord_type y1,
@@ -399,10 +453,10 @@ class LogLinearInterpolation : public Traits
 
     intersect(x1, y1, z1, x3, y3, z3, hi, X1, Y1);
     intersect(x2, y2, z2, x3, y3, z3, hi, X2, Y2);
-    flipset.eflip(MyEdge(x1, y1, X1, Y1));
-    flipset.eflip(MyEdge(X1, Y1, X2, Y2));
-    flipset.eflip(MyEdge(X2, Y2, x2, y2));
-    flipset.eflip(MyEdge(x2, y2, x1, y1));
+    flipset.eflip(MyEdge(x1, y1, x2, y2));
+    flipset.eflip(MyEdge(x2, y2, X2, Y2));
+    flipset.eflip(MyEdge(X2, Y2, X1, Y1));
+    flipset.eflip(MyEdge(X1, Y1, x1, y1));
   }
 
   // Inside Above Above
@@ -470,9 +524,9 @@ class LogLinearInterpolation : public Traits
       else  // c2=Above
       {
         if (c3 == Below)
-          triangle_BBA(x1, y1, z1, x3, y3, z3, x2, y2, z2, lo, hi, flipset);  // BAB
+          triangle_BBA(x3, y3, z3, x1, y1, z1, x2, y2, z2, lo, hi, flipset);  // BAB
         else if (c3 == Inside)
-          triangle_BIA(x1, y1, z1, x3, y3, z3, x2, y2, z2, lo, hi, flipset);  // BAI
+          triangle_BAI(x1, y1, z1, x2, y2, z2, x3, y3, z3, lo, hi, flipset);  // BAI
         else
           triangle_BAA(x1, y1, z1, x2, y2, z2, x3, y3, z3, lo, hi, flipset);  // BAA
       }
@@ -484,9 +538,9 @@ class LogLinearInterpolation : public Traits
         if (c3 == Below)
           triangle_BBI(x2, y2, z2, x3, y3, z3, x1, y1, z1, lo, hi, flipset);  // IBB
         else if (c3 == Inside)
-          triangle_BII(x2, y2, z2, x1, y1, z1, x3, y3, z3, lo, hi, flipset);  // IBI
+          triangle_BII(x2, y2, z2, x3, y3, z3, x1, y1, z1, lo, hi, flipset);  // IBI
         else
-          triangle_BIA(x2, y2, z2, x1, y1, z1, x3, y3, z3, lo, hi, flipset);  // IBA
+          triangle_BAI(x2, y2, z2, x3, y3, z3, x1, y1, z1, lo, hi, flipset);  // IBA
       }
       else if (c2 == Inside)
       {
@@ -507,7 +561,7 @@ class LogLinearInterpolation : public Traits
         if (c3 == Below)
           triangle_BIA(x3, y3, z3, x1, y1, z1, x2, y2, z2, lo, hi, flipset);  // IAB
         else if (c3 == Inside)
-          triangle_IIA(x1, y1, z1, x3, y3, z3, x2, y2, z2, lo, hi, flipset);  // IAI
+          triangle_IIA(x3, y3, z3, x1, y1, z1, x2, y2, z2, lo, hi, flipset);  // IAI
         else                                                                  // c3=Above
           triangle_IAA(x1, y1, z1, x2, y2, z2, x3, y3, z3, lo, hi, flipset);  // IAA
       }
@@ -517,20 +571,20 @@ class LogLinearInterpolation : public Traits
       if (c2 == Below)
       {
         if (c3 == Below)
-          triangle_BBA(x3, y3, z3, x2, y2, z2, x1, y1, z1, lo, hi, flipset);  // ABB
+          triangle_BBA(x2, y2, z2, x3, y3, z3, x1, y1, z1, lo, hi, flipset);  // ABB
         else if (c3 == Inside)
           triangle_BIA(x2, y2, z2, x3, y3, z3, x1, y1, z1, lo, hi, flipset);  // ABI
         else
-          triangle_BAA(x2, y2, z2, x1, y1, z1, x3, y3, z3, lo, hi, flipset);  // ABA
+          triangle_BAA(x2, y2, z2, x3, y3, z3, x1, y1, z1, lo, hi, flipset);  // ABA
       }
       else if (c2 == Inside)
       {
         if (c3 == Below)
-          triangle_BIA(x3, y3, z3, x2, y2, z2, x1, y1, z1, lo, hi, flipset);  // AIB
+          triangle_BAI(x3, y3, z3, x1, y1, z1, x2, y2, z2, lo, hi, flipset);  // AIB
         else if (c3 == Inside)
-          triangle_IIA(x3, y3, z3, x2, y2, z2, x1, y1, z1, lo, hi, flipset);  // AII
+          triangle_IIA(x2, y2, z2, x3, y3, z3, x1, y1, z1, lo, hi, flipset);  // AII
         else                                                                  // c3=Above
-          triangle_IAA(x2, y2, z2, x1, y1, z1, x3, y3, z3, lo, hi, flipset);  // AIA
+          triangle_IAA(x2, y2, z2, x3, y3, z3, x1, y1, z1, lo, hi, flipset);  // AIA
       }
       else
       {
@@ -612,23 +666,33 @@ class LogLinearInterpolation : public Traits
     // reduces to a point, which can be easily tested for afterwards
     // as an unique case.
 
-    // OK, now we can calculate the intersections.
-    // In all edges we require an Above and something else,
-    // that's it.
+    // Note that we choose to select the orientation of the lines
+    // so that the edge going towards the Above vertex is always the
+    // source, this guarantees a consistent orientation. It is helpful
+    // to imagine contouring from -inf to isovalue, and think what
+    // the resulting orientation would then be.
 
     std::vector<coord_type> x, y;
     intersect(x, y, x1, y1, z1, c1, x2, y2, z2, c2, value);
     intersect(x, y, x2, y2, z2, c2, x3, y3, z3, c3, value);
-    intersect(x, y, x3, y3, z3, c3, x1, y1, z1, c1, value);
+    place_type final_place = c3;
+    if (x.size() != 2)
+    {
+      intersect(x, y, x3, y3, z3, c3, x1, y1, z1, c1, value);
+      final_place = c1;
+    }
 
     // flush the buffer, whose size should always be 2
 
     assert(x.size() == 2);
 
-    // And this test is used to omit the Above+Above+Inside
-    // case as redundant
+    // The extra test done by eflip is used to omit the Above+Above+Inside
+    // case as redundant.
 
-    flipset.eflip(MyEdge(x[0], y[0], x[1], y[1]));
+    if (final_place == Below)
+      flipset.eflip(MyEdge(x[0], y[0], x[1], y[1]));
+    else
+      flipset.eflip(MyEdge(x[1], y[1], x[0], y[0]));
   }
 
   static void rectangle(coord_type x1,
@@ -671,14 +735,212 @@ class LogLinearInterpolation : public Traits
     }
     else
     {
-      coord_type x0 = (x1 + x2 + x3 + x4) / 4;
-      coord_type y0 = (y1 + y2 + y3 + y4) / 4;
-      value_type z0 = expm1((log1p(z1) + log1p(z2) + log1p(z3) + log1p(z4)) / 4);
-      triangle(x1, y1, z1, x2, y2, z2, x0, y0, z0, value, flipset);
-      triangle(x2, y2, z2, x3, y3, z3, x0, y0, z0, value, flipset);
-      triangle(x3, y3, z3, x4, y4, z4, x0, y0, z0, value, flipset);
-      triangle(x4, y4, z4, x1, y1, z1, x0, y0, z0, value, flipset);
+      place_type c1 = placement(z1, value);
+      place_type c2 = placement(z2, value);
+      place_type c3 = placement(z3, value);
+      place_type c4 = placement(z4, value);
+
+      // Quick code if c1=c2=c3=c4
+
+      if (c1 == c2 && c2 == c3 && c3 == c4) return;
+
+      std::vector<coord_type> x, y;
+      if (c1 == Below)
+      {
+        if (c2 == Below)
+        {
+          if (c3 == Below)
+          {
+            if (c4 == Below)
+            {
+            }
+            else  // BBBA
+            {
+              intersect(x, y, x4, y4, z4, c4, x1, y1, z1, c1, value);
+              intersect(x, y, x3, y3, z3, c3, x4, y4, z4, c4, value);
+            }
+          }
+          else
+          {
+            if (c4 == Below)  // BBAB
+            {
+              intersect(x, y, x3, y3, z3, c3, x4, y4, z4, c4, value);
+              intersect(x, y, x2, y2, z2, c2, x3, y3, z3, c3, value);
+            }
+            else  // BBAA
+            {
+              intersect(x, y, x4, y4, z4, c4, x1, y1, z1, c1, value);
+              intersect(x, y, x2, y2, z2, c2, x3, y3, z3, c3, value);
+            }
+          }
+        }
+        else
+        {
+          if (c3 == Below)
+          {
+            if (c4 == Below)  // BABB
+            {
+              intersect(x, y, x2, y2, z2, c2, x3, y3, z3, c3, value);
+              intersect(x, y, x1, y1, z1, c1, x2, y2, z2, c2, value);
+            }
+            else  // BABA
+            {
+              value_type z0 = expm1((log1p(z1) + log1p(z2) + log1p(z3) + log1p(z4)) / 4);
+              place_type c0 = placement(z0, value);
+              if (c0 == c1)  // Below
+              {
+                intersect(x, y, x2, y2, z2, c2, x3, y3, z3, c3, value);
+                intersect(x, y, x1, y1, z1, c1, x2, y2, z2, c2, value);
+                flush_line(x, y, flipset);
+                intersect(x, y, x4, y4, z4, c4, x1, y1, z1, c1, value);
+                intersect(x, y, x3, y3, z3, c3, x4, y4, z4, c4, value);
+              }
+              else
+              {
+                intersect(x, y, x4, y4, z4, c4, x1, y1, z1, c1, value);
+                intersect(x, y, x1, y1, z1, c1, x2, y2, z2, c2, value);
+                flush_line(x, y, flipset);
+                intersect(x, y, x2, y2, z2, c2, x3, y3, z3, c3, value);
+                intersect(x, y, x3, y3, z3, c3, x4, y4, z4, c4, value);
+              }
+            }
+          }
+          else
+          {
+            if (c4 == Below)  // BAAB
+            {
+              intersect(x, y, x3, y3, z3, c3, x4, y4, z4, c4, value);
+              intersect(x, y, x1, y1, z1, c1, x2, y2, z2, c2, value);
+            }
+            else  // BAAA
+            {
+              intersect(x, y, x4, y4, z4, c4, x1, y1, z1, c1, value);
+              intersect(x, y, x1, y1, z1, c1, x2, y2, z2, c2, value);
+            }
+          }
+        }
+      }
+      else if (c2 == Below)
+      {
+        if (c3 == Below)
+        {
+          if (c4 == Below)  // ABBB
+          {
+            intersect(x, y, x1, y1, z1, c1, x2, y2, z2, c2, value);
+            intersect(x, y, x4, y4, z4, c4, x1, y1, z1, c1, value);
+          }
+          else  // ABBA
+          {
+            intersect(x, y, x1, y1, z1, c1, x2, y2, z2, c2, value);
+            intersect(x, y, x3, y3, z3, c3, x4, y4, z4, c4, value);
+          }
+        }
+        else
+        {
+          if (c4 == Below)  // ABAB
+          {
+            value_type z0 = (z1 + z2 + z3 + z4) / 4;
+            place_type c0 = placement(z0, value);
+            if (c0 == c1)  // Above
+            {
+              intersect(x, y, x1, y1, z1, c1, x2, y2, z2, c2, value);
+              intersect(x, y, x2, y2, z2, c2, x3, y3, z3, c3, value);
+              flush_line(x, y, flipset);
+              intersect(x, y, x3, y3, z3, c3, x4, y4, z4, c4, value);
+              intersect(x, y, x4, y4, z4, c4, x1, y1, z1, c1, value);
+            }
+            else
+            {
+              intersect(x, y, x1, y1, z1, c1, x2, y2, z2, c2, value);
+              intersect(x, y, x4, y4, z4, c4, x1, y1, z1, c1, value);
+              flush_line(x, y, flipset);
+              intersect(x, y, x3, y3, z3, c3, x4, y4, z4, c4, value);
+              intersect(x, y, x2, y2, z2, c2, x3, y3, z3, c3, value);
+            }
+          }
+          else  // ABAA
+          {
+            intersect(x, y, x1, y1, z1, c1, x2, y2, z2, c2, value);
+            intersect(x, y, x2, y2, z2, c2, x3, y3, z3, c3, value);
+          }
+        }
+      }
+      else
+      {
+        if (c3 == Below)
+        {
+          if (c4 == Below)  // AABB
+          {
+            intersect(x, y, x2, y2, z2, c2, x3, y3, z3, c3, value);
+            intersect(x, y, x4, y4, z4, c4, x1, y1, z1, c1, value);
+          }
+          else  // AABA
+          {
+            intersect(x, y, x2, y2, z2, c2, x3, y3, z3, c3, value);
+            intersect(x, y, x3, y3, z3, c3, x4, y4, z4, c4, value);
+          }
+        }
+        else
+        {
+          if (c4 == Below)  // AAAB
+          {
+            intersect(x, y, x3, y3, z3, c3, x4, y4, z4, c4, value);
+            intersect(x, y, x4, y4, z4, c4, x1, y1, z1, c1, value);
+          }
+          else  // AAAA
+          {
+          }
+        }
+      }
+      if (!x.empty()) flush_line(x, y, flipset);
     }
+  }
+
+  static bool is_saddle(value_type z1, value_type z2, value_type z3, value_type z4)
+  {
+    return (z1 < z2 && z1 < z4 && z2 < z3 && z4 < z3);
+  }
+
+  // A polygon is convex if all cross products of adjacent edges are of the same sign,
+  // and the sign itself says whether the polygon is clockwise or not.
+  // Ref: http://www.easywms.com/node/3602
+  // We must disallow non-convex cells such as V-shaped ones, since the intersections
+  // formulas may then produce values outside the cell.
+
+  // Note that we permit colinear ajdacent edges, since for example in latlon grids
+  // the poles are represented by multiple grid points. This test thus passes the
+  // redundant case of a rectangle with no area, but the rest of the code can handle it.
+
+  static bool convex_and_clockwise(coord_type x1,
+                                   coord_type y1,
+                                   coord_type x2,
+                                   coord_type y2,
+                                   coord_type x3,
+                                   coord_type y3,
+                                   coord_type x4,
+                                   coord_type y4)
+  {
+    return ((x2 - x1) * (y3 - y2) - (y2 - y1) * (x3 - x2) <= 0 &&
+            (x3 - x2) * (y4 - y3) - (y3 - y2) * (x4 - x3) <= 0 &&
+            (x4 - x3) * (y1 - y4) - (y4 - y3) * (x1 - x4) <= 0 &&
+            (x1 - x4) * (y2 - y1) - (y1 - y4) * (x2 - x1) <= 0);
+  }
+
+  static coord_type area(coord_type x1,
+                         coord_type y1,
+                         coord_type x2,
+                         coord_type y2,
+                         coord_type x3,
+                         coord_type y3,
+                         coord_type x4,
+                         coord_type y4)
+  {
+    // clang-format off
+    return ((x2 - x1) * (y3 - y2) - (y2 - y1) * (x3 - x2) +
+            (x3 - x2) * (y4 - y3) - (y3 - y2) * (x4 - x3) +
+            (x4 - x3) * (y1 - y4) - (y4 - y3) * (x1 - x4) +
+            (x1 - x4) * (y2 - y1) - (y1 - y4) * (x2 - x1) );
+    // clang-format on
   }
 
   static void rectangle(coord_type x1,
@@ -707,8 +969,13 @@ class LogLinearInterpolation : public Traits
       return;
     }
 
+    // Ignore suspect rectangles
+
+    if (!convex_and_clockwise(x1, y1, x2, y2, x3, y3, x4, y4)) return;
+
     // If only one corner is missing, we can contour the remaining
     // triangle. If two or more are missing, we cannot do anything.
+    // Chosen CW-order is: 1,2,3,4
 
     if (LogLinearInterpolation::missing(z1))
     {
@@ -728,24 +995,6 @@ class LogLinearInterpolation : public Traits
     }
     else
     {
-// If both limits are missing, all valid values are desired
-// and hence we can simply cover the entire rectangle. However,
-// -inf..+inf contouring is a special case which will be handled
-// correctly by the if-tests coming up next. For normal cases
-// we thus gain a tiny bit of speed by nothing bothering
-// with these two if's
-
-#if 0
-		if(LogLinearInterpolation::missing(lo) && LogLinearInterpolation::missing(hi))
-		{
-		  flipgrid.flipTop(gridx,gridy);
-		  flipgrid.flipRight(gridx,gridy);
-		  flipgrid.flipBottom(gridx,gridy);
-		  flipgrid.flipLeft(gridx,gridy);
-		  return;
-		}
-#endif
-
       place_type c1 = placement(z1, lo, hi);
       place_type c2 = placement(z2, lo, hi);
       place_type c3 = placement(z3, lo, hi);
@@ -753,6 +1002,7 @@ class LogLinearInterpolation : public Traits
 
       // Quick code if c1=c2=c3=c4
 
+      // This is a good speedup (30% at one point in time)
       if (c1 == c2 && c2 == c3 && c3 == c4)
       {
         // If all above or below there is nothing to do,
@@ -768,38 +1018,37 @@ class LogLinearInterpolation : public Traits
         return;
       }
 
-#if 0
-		std::vector<coord_type> X, Y;
-		intersect(X,Y,x1,y1,z1,c1,x2,y2,z2,c2,lo,hi);
-		intersect(X,Y,x2,y2,z2,c2,x3,y3,z3,c3,lo,hi);
-		intersect(X,Y,x3,y3,z3,c3,x4,y4,z4,c4,lo,hi);
-		intersect(X,Y,x4,y4,z4,c4,x1,y1,z1,c1,lo,hi);
-		addedges(X,Y,flipset);
-#else
-      // Subdivide into triangles to avoid problems with saddle points.
-      // Note that we cannot simply skip subdivision if there is
-      // no saddle point since an *adjacent* interval being contoured
-      // might see the saddle point and do the subdivision. This means
-      // adjacent contour fills would not have a common border, but
-      // there would be gaps. Hence we always subdivide.
-      //
-      // One could test for a saddle point like this:
-      //
-      // bool saddlepoint = ((c1==c3 || c2==c4) && (c1!=c2 && c3!=c4));
+      // Note: We must determine whether there is a saddle in the data
+      // without using the contour limits so that the same decision
+      // will be made for all contours.
 
-      coord_type x0 = (x1 + x2 + x3 + x4) / 4;
-      coord_type y0 = (y1 + y2 + y3 + y4) / 4;
-      value_type z0 = expm1((log1p(z1) + log1p(z2) + log1p(z3) + log1p(z4)) / 4);
-      place_type c0 = placement(z0, lo, hi);
-      triangle(x1, y1, z1, c1, x2, y2, z2, c2, x0, y0, z0, c0, lo, hi, flipset);
-      triangle(x2, y2, z2, c2, x3, y3, z3, c3, x0, y0, z0, c0, lo, hi, flipset);
-      triangle(x3, y3, z3, c3, x4, y4, z4, c4, x0, y0, z0, c0, lo, hi, flipset);
-      triangle(x4, y4, z4, c4, x1, y1, z1, c1, x0, y0, z0, c0, lo, hi, flipset);
-#endif
+      bool saddlepoint = is_saddle(z1, z2, z3, z4) || is_saddle(z2, z3, z4, z1) ||
+                         is_saddle(z3, z4, z1, z2) || is_saddle(z4, z1, z2, z3);
+
+      if (!saddlepoint)
+      {
+        std::vector<coord_type> x, y;
+        intersect(x, y, x1, y1, z1, c1, x2, y2, z2, c2, lo, hi);
+        intersect(x, y, x2, y2, z2, c2, x3, y3, z3, c3, lo, hi);
+        intersect(x, y, x3, y3, z3, c3, x4, y4, z4, c4, lo, hi);
+        intersect(x, y, x4, y4, z4, c4, x1, y1, z1, c1, lo, hi);
+        flush_polygon(x, y, flipset);
+      }
+      else
+      {
+        coord_type x0 = (x1 + x2 + x3 + x4) / 4;
+        coord_type y0 = (y1 + y2 + y3 + y4) / 4;
+        value_type z0 = expm1((log1p(z1) + log1p(z2) + log1p(z3) + log1p(z4)) / 4);
+
+        triangle(x1, y1, z1, x2, y2, z2, x0, y0, z0, lo, hi, flipset);
+        triangle(x2, y2, z2, x3, y3, z3, x0, y0, z0, lo, hi, flipset);
+        triangle(x3, y3, z3, x4, y4, z4, x0, y0, z0, lo, hi, flipset);
+        triangle(x4, y4, z4, x1, y1, z1, x0, y0, z0, lo, hi, flipset);
+      }
     }
   }
 
-};  // class LinearInterpolation
+};  // class LogLinearInterpolation
 
 }  // namespace Tron
 
