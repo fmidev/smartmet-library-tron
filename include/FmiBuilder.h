@@ -280,6 +280,9 @@ long pick_best_match(const Polylines &polylines,
       available.push_back(i);
     else if (targets[i] == polylineindex)
       *self_touch = true;
+    else if (!polylines[targets[i]].closed())
+      // Non-closed polylines are viable candidates for continuation
+      available.push_back(i);
   }
 
   // Nothing available?

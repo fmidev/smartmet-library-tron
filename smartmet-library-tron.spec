@@ -4,7 +4,7 @@
 Summary: tron library
 Name: %{SPECNAME}
 Version: 17.1.19
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-tron
@@ -41,6 +41,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/lib%{LIBNAME}.a
 
 %changelog
+* Thu Jan 19 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.1.19-2.fmi
+- Build as long isolines as possible while keeping geometry valid
+
 * Thu Jan 19 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.1.19d8-1.fmi
 - Removed speed optimizations which do not seem to be robust
 
