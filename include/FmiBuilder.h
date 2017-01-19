@@ -241,16 +241,14 @@ long pick_best_match(const Polylines &polylines,
 
   std::size_t nedges = edges.size();
 
+#ifdef OPTIMIZE_ONE_CHOICE
+  // This optimization is not robust for polylines
+
   if (pos + 1 == nedges || !(edges[pos + 1] == endcoordinate))
   {
     // No best pick if the edge is already taken. Could happen with polylines, not with polygons.
-    if (targets[pos] < 0) return pos;
 
-#if 0
-    std::cout << "Targets size = " << targets.size() << "\tpos = " << pos
-              << "\t targets[pos] = " << targets[pos] << "\tnpolylines = " << polylines.size()
-              << std::endl;
-#endif
+    if (targets[pos] < 0) return pos;
 
     if (targets[pos] == polylineindex)
       *self_touch = true;
@@ -265,6 +263,7 @@ long pick_best_match(const Polylines &polylines,
     // There is a previous polyline we can extend.
     return pos;
   }
+#endif
 
   // There must be multiple matches then, but perhaps not all are taken.
   // Also, if any of the matches has already been selected for the current polygon,
