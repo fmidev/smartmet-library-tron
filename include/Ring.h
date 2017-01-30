@@ -106,7 +106,7 @@ class Ring
   bool extendStart(Ring& other, coord_type x1, coord_type y1, coord_type x2, coord_type y2)
   {
     if (itsData.front().first != x1 || itsData.front().second != y1) return false;
-    if (other.itsData.back().first != x1 || other.itsData.back().second != y1) return false;
+    if (other.itsData.back().first != x2 || other.itsData.back().second != y2) return false;
     itsData.pop_front();                             // drop the old x1,y1
     itsData.splice(itsData.begin(), other.itsData);  // this will reintroduce it
     return true;

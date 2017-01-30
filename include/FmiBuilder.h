@@ -1,6 +1,6 @@
 // ======================================================================
 /*!
- * Building utility for FMI.
+l* Building utility for FMI.
  *
  * GeosBuilder is just too slow.
  *
@@ -226,10 +226,14 @@ long pick_best_match(const Polylines &polylines,
                      const Targets &targets,
                      long pos,
                      long polylineindex,
-                     bool *self_touch)
+                     bool *self_touch,
+                     bool *isoline_extension)
 {
   // Not touching itself
   *self_touch = false;
+
+  // Now extending old isoline
+  *isoline_extension = false;
 
   // Return no choice if there is nothing to choose from
   if (pos < 0) return pos;
@@ -289,28 +293,43 @@ long pick_best_match(const Polylines &polylines,
   if (available.empty()) return -1;
 
   // No need to calculate angles if there is only one choice remaining
-  if (available.size() == 1) return available[0];
-
-  // Pick the edge that turns most clockwise with respect to the end of the polyline.
-  // (most negative turn in range -180...+180)
 
   std::size_t bestpos = 0;
-  double bestangle = +999;
-  double alpha1 = polyline.endAngle();
 
-  for (std::size_t i = 0; i < available.size(); i++)
+  if (available.size() == 1)
+    bestpos = available[0];
+
+  else
   {
-    double alpha2 = edges[available[i]].angle();
-    // The extra +360 makes sure the fmod argument is positive
-    // The +180 and -180 make the result -180...+180
-    double angle = fmod(alpha2 - alpha1 + 180 + 360, 360.0) - 180;  // symmetric modulo
+    // Pick the edge that turns most clockwise with respect to the end of the polyline.
+    // (most negative turn in range -180...+180)
 
-    if (angle < bestangle)
+    double bestangle = +999;
+    double alpha1 = polyline.endAngle();
+
+    for (std::size_t i = 0; i < available.size(); i++)
     {
-      bestangle = angle;
-      bestpos = available[i];
+      double alpha2 = edges[available[i]].angle();
+      // The extra +360 makes sure the fmod argument is positive
+      // The +180 and -180 make the result -180...+180
+      double angle = fmod(alpha2 - alpha1 + 180 + 360, 360.0) - 180;  // symmetric modulo
+
+      if (angle < bestangle)
+      {
+        bestangle = angle;
+        bestpos = available[i];
+      }
     }
   }
+
+  // We're extending an old isoline if the best match is not closed. We also know it
+  // will never be closed, otherwise the algorithm would have closed it already.
+
+  if (targets[bestpos] >= 0 && targets[bestpos] < polylines.size())
+  {
+    *isoline_extension = !polylines[targets[bestpos]].closed();
+  }
+
   return bestpos;
 }
 
@@ -523,11 +542,18 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
     {
       // Find the best match available
       bool self_touch = false;
+      bool isoline_extension = false;
 
       std::size_t tmp = index;
       index = find_first_match(polyline, edges, targets, index, lastindex);
-      index =
-          pick_best_match(polylines, polyline, edges, targets, index, polylineindex, &self_touch);
+      index = pick_best_match(polylines,
+                              polyline,
+                              edges,
+                              targets,
+                              index,
+                              polylineindex,
+                              &self_touch,
+                              &isoline_extension);
       lastindex = tmp;
 
       // End the polyline if there are no more matches
@@ -552,30 +578,52 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
           reindex_edges(targets, edgeindexes, ++polylineindex);
         }
         else
-          std::cout << "Discarding empty cut ring" << std::endl;
+          std::cout << "Warning: Discarding empty cut ring" << std::endl;
       }
 
-      // Extend the polyline and mark the edge used
-
+      // The best edge found
       const typename Edges::value_type &best = edges[index];
+
+      // Extend old polyline with current one if possible and begin a new one
+      if (isoline_extension)
+      {
+        if (polylines[targets[index]].extendStart(
+                polyline, best.x1(), best.y1(), best.x2(), best.y2()))
+        {
+          // No need for this, the edge was already assigned
+          // edgeindexes.push_back(index);
+
+          // Assign current edges to the old polyline at polylines[index]
+          reindex_edges(targets, edgeindexes, targets[index]);
+
+          // Start a new polyline with the same index as before
+          --polylineindex;
+          break;
+        }
+        else
+        {
+          // Now we're touching an old polyline somewhere else beside its start point.
+          // Time to stop this polyline.
+          // We could also slice the self-touching part from the older polyline,
+          // this would make the algorithm always take the same right-turning choise
+          // as the isoband algorithm does. Does not seem to be worth the trouble though.
+          ringedge.push_back(representative_edge(edges, edgeindexes));
+          polylines.emplace_back();
+          std::swap(polylines.back(), polyline);
+          break;
+        }
+      }
 
       if (targets[index] < 0)
       {
         if (!polyline.extendEnd(best.x1(), best.y1(), best.x2(), best.y2()))
-          throw std::runtime_error("Internal error while contouring");
+          throw std::runtime_error("Internal error while contouring, failed to extend polygon");
+        // Mark the found edge used
         targets[index] = polylines.size();
         edgeindexes.push_back(index);
       }
       else
-      {
-        // Extend a previous polyline from the start
-        if (!polylines[targets[index]].extendStart(
-                polyline, best.x1(), best.y1(), best.x2(), best.y2()))
-          throw std::runtime_error("Internal error while contouring isolines");
-        reindex_edges(targets, edgeindexes, targets[index]);
-        --polylineindex;  // we didn't create anything new
-        break;
-      }
+        throw std::runtime_error("Internal error, self touching isoline not handled properly");
 
       // Terminate the polyline if it became closed
       if (polyline.closed())
@@ -589,8 +637,8 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
         }
         else
         {
-          // Discard empty rings
-          std::cout << "Discarding empty ring" << std::endl;
+          // Discard empty rings - should not happen unless coordinates are degenerate
+          std::cout << "Warning: Discarding empty ring created by contouring" << std::endl;
           Polyline tmp;
           std::swap(tmp, polyline);
         }
