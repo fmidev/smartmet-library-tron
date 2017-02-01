@@ -12,7 +12,6 @@ Source0: %{name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot-%(%{__id_u} -n)
 BuildRequires: boost-devel
 BuildRequires: geos-devel >= 3.4.2
-BuildRequires: sparsehash-devel
 Requires: geos >= 3.4.2
 Provides: %{LIBNAME}
 Obsoletes: libsmartmet-tron < 17.1.4
