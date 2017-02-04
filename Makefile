@@ -65,10 +65,6 @@ includedir = $(PREFIX)/include
 datadir = $(PREFIX)/share
 objdir = obj
 
-# rpm variables
-
-rpmsourcedir=/tmp/$(shell whoami)/rpmbuild
-
 # Compilation directories
 
 vpath %.cpp source
@@ -127,10 +123,9 @@ objdir:
 rpm: clean
 	if [ -e $(SPEC).spec ]; \
 	then \
-	  mkdir -p $(rpmsourcedir) ; \
-	  tar -czvf $(rpmsourcedir)/$(SPEC).tar.gz --transform "s,^,$(SPEC)/," * ; \
-	  rpmbuild -ta $(rpmsourcedir)/$(SPEC).tar.gz ; \
-	  rm -f $(rpmsourcedir)/$(SPEC).tar.gz ; \
+	  tar -czvf $(SPEC).tar.gz --transform "s,^,$(SPEC)/," * ; \
+	  rpmbuild -ta $(SPEC).tar.gz ; \
+	  rm -f $(SPEC).tar.gz ; \
 	else \
 	  echo $(SPEC).spec file missing; \
 	fi;
