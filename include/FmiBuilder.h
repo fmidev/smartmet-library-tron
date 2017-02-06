@@ -42,8 +42,6 @@ l* Building utility for FMI.
 
 #include "Ring.h"
 
-#include <google/dense_hash_set>
-
 #include <geos/algorithm/CGAlgorithms.h>
 #include <geos/geom/CoordinateArraySequence.h>
 #include <geos/geom/CoordinateSequenceFactory.h>
