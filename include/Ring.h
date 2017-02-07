@@ -112,6 +112,17 @@ class Ring
     return true;
   }
 
+  // Try to extend the start of the polyline with another
+  bool extendStart(Ring& other)
+  {
+    if (itsData.front().first != other.itsData.back().first ||
+        itsData.front().second != other.itsData.back().second)
+      return false;
+    itsData.pop_front();                             // drop the old x1,y1
+    itsData.splice(itsData.begin(), other.itsData);  // this will reintroduce it
+    return true;
+  }
+
   // Mostly for debugging purposes
 
   std::string asText(int precision = 3) const

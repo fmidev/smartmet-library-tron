@@ -585,8 +585,7 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
       // Extend old polyline with current one if possible and begin a new one
       if (isoline_extension)
       {
-        if (polylines[targets[index]].extendStart(
-                polyline, best.x1(), best.y1(), best.x2(), best.y2()))
+        if (polylines[targets[index]].extendStart(polyline))
         {
           // No need for this, the edge was already assigned
           // edgeindexes.push_back(index);

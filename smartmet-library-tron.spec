@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: tron library
 Name: %{SPECNAME}
-Version: 17.1.31
+Version: 17.2.7
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -40,6 +40,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/lib%{LIBNAME}.a
 
 %changelog
+* Tue Feb  7 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.2.7-1.fmi
+- Fixed another problem in isoline building
+
 * Tue Jan 31 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.1.31-1.fmi
 - Switched from google/dense_hash to std::unordered_set, the former does not scale to huge datasets
 
