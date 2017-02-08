@@ -67,8 +67,8 @@ objdir = obj
 
 # Compilation directories
 
-vpath %.cpp source
-vpath %.h include
+vpath %.cpp $(SUBNAME)
+vpath %.h $(SUBNAME)
 vpath %.o obj
 
 # How to install
@@ -80,8 +80,8 @@ INSTALL_DATA = install -m 664
 
 # The files to be compiled
 
-SRCS = $(wildcard source/*.cpp)
-HDRS = $(wildcard include/*.h)
+SRCS = $(wildcard $(SUBNAME)/*.cpp)
+HDRS = $(wildcard $(SUBNAME)/*.h)
 OBJS = $(patsubst %.cpp, obj/%.o, $(notdir $(SRCS)))
 
 INCLUDES := -Iinclude $(INCLUDES)
@@ -100,7 +100,7 @@ $(LIBFILE): $(OBJS)
 	$(AR) $(ARFLAGS) $(LIBFILE) $(OBJS)
 
 clean:
-	rm -f $(LIBFILE) include/*~ source/*~
+	rm -f $(LIBFILE) $(SUBNAME)/*~
 	rm -rf obj
 
 install:
@@ -135,6 +135,4 @@ rpm: clean
 obj/%.o : %.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
 
-ifneq ($(wildcard obj/*.d),)
-include $(wildcard obj/*.d)
-endif
+-include $(wildcard obj/*.d)
