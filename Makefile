@@ -103,6 +103,9 @@ clean:
 	rm -f $(LIBFILE) $(SUBNAME)/*~
 	rm -rf obj
 
+format:
+	clang-format -i -style=file $(SUBNAME)/*.h $(SUBNAME)/*.cpp test/*.cpp
+
 install:
 	@mkdir -p $(includedir)/$(INCDIR)
 	@list='$(HDRS)'; \
