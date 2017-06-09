@@ -1,4 +1,5 @@
 *~
+*.d
 .sconsign.dblite
 lib*.a
 obj/
