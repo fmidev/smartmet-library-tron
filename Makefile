@@ -102,6 +102,7 @@ $(LIBFILE): $(OBJS)
 clean:
 	rm -f $(LIBFILE) $(SUBNAME)/*~
 	rm -rf obj
+	+cd test && make clean
 
 format:
 	clang-format -i -style=file $(SUBNAME)/*.h $(SUBNAME)/*.cpp test/*.cpp
