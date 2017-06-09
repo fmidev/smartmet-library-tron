@@ -60,15 +60,13 @@ void rectangles()
   typedef Grid<int> MyGrid;
   typedef Tron::CoordinateHints<MyGrid, MyTraits> MyHints;
 
-  typedef MyHints::return_type rectangles;
-
   MyGrid grid(1000, 1000);
 
   {
     MyHints hints(grid);
 
     // Low left corner for trivial test
-    rectangles r = hints.rectangles(0, 0, 5, 5);
+    auto r = hints.get_rectangles(0, 0, 5, 5);
     if (r.size() != 1) TEST_FAILED("box 0,0 5,5 should return one rectangle");
     if (r.front().x1 != 0) TEST_FAILED("box 0,0 5,5 should be 0,0 7,7 : x1 is not 0");
     if (r.front().y1 != 0) TEST_FAILED("box 0,0 5,5 should be 0,0 7,7 : y1 is not 0");
@@ -76,11 +74,11 @@ void rectangles()
     if (r.front().y2 != 7) TEST_FAILED("box 0,0 5,5 should be 0,0 7,7 : y2 is not 7");
 
     // Completely outside
-    r = hints.rectangles(10000, 10000, 20000, 20000);
+    r = hints.get_rectangles(10000, 10000, 20000, 20000);
     if (r.size() != 0) TEST_FAILED("box 10000,10000 20000,20000 should be empty");
 
     // In the center we get 19 6x6 rectangles which cover about 68% of the grid
-    r = hints.rectangles(100, 100, 150, 150);
+    r = hints.get_rectangles(100, 100, 150, 150);
     if (r.size() == 0) TEST_FAILED("box 100,100 150,150 should not be empty");
 
     for (auto it = r.begin(); it != r.end(); ++it)

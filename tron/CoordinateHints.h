@@ -31,8 +31,8 @@
 
 #include "Missing.h"
 #include <boost/shared_ptr.hpp>
-#include <list>
 #include <stdexcept>
+#include <vector>
 
 namespace Tron
 {
@@ -56,7 +56,7 @@ class CoordinateHints : public Traits
     bool isvalid = false;
   };
 
-  typedef std::list<Rectangle> return_type;
+  typedef std::vector<Rectangle> rectangles;
 
   CoordinateHints(const Grid& theGrid, size_type theMaxSize = 10)
       : itsMaxSize(theMaxSize), itsRoot(new RecursiveInfo())
@@ -67,16 +67,16 @@ class CoordinateHints : public Traits
     recurse(itsRoot, theGrid, 0, 0, theGrid.width() - 1, theGrid.height() - 1);
   }
 
-  return_type rectangles(coord_type theMinX,
-                         coord_type theMinY,
-                         coord_type theMaxX,
-                         coord_type theMaxY) const
+  rectangles get_rectangles(coord_type theMinX,
+                            coord_type theMinY,
+                            coord_type theMaxX,
+                            coord_type theMaxY) const
   {
 #ifdef MYDEBUG
     std::cout << "Searching rect: " << theMinX << "," << theMinY << " - " << theMaxX << ","
               << theMaxY << std::endl;
 #endif
-    return_type ret;
+    rectangles ret;
     if (find(ret, itsRoot, theMinX, theMinY, theMaxX, theMaxY))
       ret.push_back(itsRoot->itsRectangle);
     return ret;
@@ -242,7 +242,7 @@ class CoordinateHints : public Traits
     return !no_overlap;
   }
 
-  bool find(return_type& theRectangles,
+  bool find(rectangles& theRectangles,
             const node_type& theNode,
             coord_type theXMin,
             coord_type theYMin,

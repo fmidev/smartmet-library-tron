@@ -30,8 +30,8 @@
 
 #include "Missing.h"
 #include <boost/shared_ptr.hpp>
-#include <list>
 #include <stdexcept>
+#include <vector>
 
 namespace Tron
 {
@@ -53,7 +53,7 @@ class Hints : public Traits
     bool hasmissing;
   };
 
-  typedef std::list<Rectangle> return_type;
+  typedef std::vector<Rectangle> rectangles;
 
   Hints(const Grid& theGrid, size_type theMaxSize = 10)
       : itsMaxSize(theMaxSize), itsRoot(new RecursiveInfo())
@@ -64,16 +64,16 @@ class Hints : public Traits
     recurse(itsRoot, theGrid, 0, 0, theGrid.width() - 1, theGrid.height() - 1);
   }
 
-  return_type rectangles(value_type theValue) const
+  rectangles get_rectangles(value_type theValue) const
   {
-    return_type ret;
+    rectangles ret;
     if (find(ret, itsRoot, theValue)) ret.push_back(itsRoot->itsRectangle);
     return ret;
   }
 
-  return_type rectangles(value_type theLoLimit, value_type theHiLimit) const
+  rectangles get_rectangles(value_type theLoLimit, value_type theHiLimit) const
   {
-    return_type ret;
+    rectangles ret;
     if (find(ret, itsRoot, theLoLimit, theHiLimit)) ret.push_back(itsRoot->itsRectangle);
     return ret;
   }
@@ -238,7 +238,7 @@ class Hints : public Traits
     }
   }
 
-  bool find(return_type& theRectangles, const node_type& theNode, value_type theValue) const
+  bool find(rectangles& theRectangles, const node_type& theNode, value_type theValue) const
   {
     bool haschildren = (theNode->itsLeft.get() != 0 && theNode->itsRight.get() != 0);
 
@@ -263,7 +263,7 @@ class Hints : public Traits
     }
   }
 
-  bool find(return_type& theRectangles,
+  bool find(rectangles& theRectangles,
             const node_type& theNode,
             value_type theLoLimit,
             value_type theHiLimit) const

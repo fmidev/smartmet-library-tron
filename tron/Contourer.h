@@ -48,6 +48,7 @@
 
 #pragma once
 
+#include "CoordinateHints.h"
 #include "Edge.h"
 #include "FlipGrid.h"
 #include "FlipSet.h"
@@ -71,10 +72,11 @@ class Contourer : public Interpolation<Traits>
   typedef typename Traits::coord_type coord_type;
   typedef typename Traits::value_type value_type;
   typedef Hints<Grid, Traits> hints_type;
+  typedef Hints<Grid, Traints> coordinate_hints_type;
 
-  // Calculate polygon surrounding the given
-  // value range and pass it to the polygon
-  // adapter as moveto, lineto and closepath calls.
+  /*
+   * Calculate polygon surrounding the given value range.
+   */
 
   static void fill(
       PathAdapter& path, const Grid& grid, value_type lolimit, value_type hilimit, bool worlddata)
@@ -112,9 +114,10 @@ class Contourer : public Interpolation<Traits>
     Builder::fill<Traits>(flipset.edges(), path);
   }
 
-  // Same as above +
-  // Optimized contouring utilizes the given data hints
-  // so that only relevant subgrids will be contoured.
+  /*
+   * Calculate polygon surrounding the given value range. Use the given hints
+   * on data values to contour only areas of interest.
+   */
 
   static void fill(PathAdapter& path,
                    const Grid& grid,
@@ -123,7 +126,7 @@ class Contourer : public Interpolation<Traits>
                    bool worlddata,
                    const hints_type& hints)
   {
-    typename hints_type::return_type rects = hints.rectangles(lolimit, hilimit);
+    typename hints_type::rectangles rects = hints.get_rectangles(lolimit, hilimit);
 
     MyFlipSet flipset;
     FlipGrid flipgrid(grid.width(), grid.height(), worlddata);
@@ -184,10 +187,83 @@ class Contourer : public Interpolation<Traits>
     Builder::fill<Traits>(flipset.edges(), path);
   }
 
-  // Calculate polyline for the given data value
-  // and pass it to the polygon adapter as moveto,
-  // lineto and closepath calls. Closepath is called
-  // only for closed subparts of the full polyline.
+  /*
+   * Calculate polygon surrounding the given value range. Process only the given
+   * list of coordinate rectangles using the prebuilt hints for them.
+   */
+
+  static void fill(PathAdapter& path,
+                   const Grid& grid,
+                   value_type lolimit,
+                   value_type hilimit,
+                   bool worlddata,
+                   const hints_type::return_type& hints,
+                   const coordinate_hints_type::return_type& coordinate_hints)
+  {
+    typename hints_type::rectangles rects = hints.get_rectangles(lolimit, hilimit);
+
+    MyFlipSet flipset;
+    FlipGrid flipgrid(grid.width(), grid.height(), worlddata);
+
+    for (typename hints_type::return_type::const_iterator it = rects.begin(), end = rects.end();
+         it != end;
+         ++it)
+    {
+      for (typename Grid::size_type j = it->y1; j < it->y2; j++)
+        for (typename Grid::size_type i = it->x1; i < it->x2; i++)
+          Contourer::rectangle(grid.x(i, j),
+                               grid.y(i, j),
+                               grid(i, j),
+                               grid.x(i, j + 1),
+                               grid.y(i, j + 1),
+                               grid(i, j + 1),
+                               grid.x(i + 1, j + 1),
+                               grid.y(i + 1, j + 1),
+                               grid(i + 1, j + 1),
+                               grid.x(i + 1, j),
+                               grid.y(i + 1, j),
+                               grid(i + 1, j),
+                               static_cast<int>(i),
+                               static_cast<int>(j),
+                               lolimit,
+                               hilimit,
+                               flipset,
+                               flipgrid);
+    }
+
+    if (worlddata)
+    {
+      typename Grid::size_type i = grid.width() - 1;
+
+      for (typename Grid::size_type j = 0; j < grid.height() - 1; j++)
+        Contourer::rectangle(grid.x(i, j),
+                             grid.y(i, j),
+                             grid(i, j),
+                             grid.x(i, j + 1),
+                             grid.y(i, j + 1),
+                             grid(i, j + 1),
+                             grid.x(i + 1, j + 1),
+                             grid.y(i + 1, j + 1),
+                             grid(i + 1, j + 1),
+                             grid.x(i + 1, j),
+                             grid.y(i + 1, j),
+                             grid(i + 1, j),
+                             i,
+                             j,
+                             lolimit,
+                             hilimit,
+                             flipset,
+                             flipgrid);
+    }
+
+    flipgrid.copy(grid, flipset);
+    flipset.prepare();
+    Builder::fill<Traits>(flipset.edges(), path);
+  }
+
+  /*
+   * Calculate isoline for the given value
+   */
 
   static void line(PathAdapter& path, const Grid& grid, value_type value, bool worlddata)
   {
@@ -216,9 +292,10 @@ class Contourer : public Interpolation<Traits>
     Builder::line<Traits>(flipset.edges(), path);
   }
 
-  // Same as above +
-  // Optimized contouring utilizes the given data hints
-  // so that only relevant subgrids will be contoured.
+  /*
+   * Calculate isoline for the given value. Use the given hints on
+   * data values to contour only areas of interest.
+   */
 
   static void line(PathAdapter& path,
                    const Grid& grid,

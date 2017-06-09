@@ -3,7 +3,7 @@ LIB = smartmet-$(SUBNAME)
 SPEC = smartmet-library-$(SUBNAME)
 INCDIR = smartmet/$(SUBNAME)
 
-FLAGS = -std=c++0x -fPIC -MD -Wall -W -Wno-unused-parameter -Wno-variadic-macros
+FLAGS = -std=c++11 -fPIC -MD -Wall -W -Wno-unused-parameter -Wno-variadic-macros
 
 FLAGS_RELEASE = -DNDEBUG -Ofast -g
 

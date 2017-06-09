@@ -5,8 +5,8 @@
  */
 // ======================================================================
 
-#include "Missing.h"
 #include "Hints.h"
+#include "Missing.h"
 #include "Traits.h"
 #include <regression/tframe.h>
 #include <iostream>
@@ -54,8 +54,6 @@ void rectangles()
   typedef Grid<MyTraits::value_type> MyGrid;
   typedef Tron::Hints<MyGrid, MyTraits> MyHints;
 
-  typedef MyHints::return_type rectangles;
-
   MyGrid data(100, 100);
   for (int j = 0; j < data.height(); j++)
     for (int i = 0; i < data.width(); i++)
@@ -64,13 +62,14 @@ void rectangles()
   {
     MyHints hints(data, 10);
 
-    rectangles r = hints.rectangles(-99, -98);
+    auto r = hints.get_rectangles(-99, -98);
+
     if (r.size() != 0) TEST_FAILED("i+j interval -99..-98 should be empty");
 
-    r = hints.rectangles(998, 999);
+    r = hints.get_rectangles(998, 999);
     if (r.size() != 0) TEST_FAILED("i+j interval 998..999 should be empty");
 
-    r = hints.rectangles(0, 5);
+    r = hints.get_rectangles(0, 5);
     if (r.size() != 1) TEST_FAILED("Failed to extract i+j interval 0...5");
     if (r.front().x1 != 0) TEST_FAILED("i+j interval 0...5 1st x1<>0");
     if (r.front().y1 != 0) TEST_FAILED("i+j interval 0...5 1st y1<>0");
@@ -79,7 +78,7 @@ void rectangles()
     if (r.front().minimum != 0) TEST_FAILED("i+j interval 0...5 1st minimum<>0");
     if (r.front().maximum != 12) TEST_FAILED("i+j interval 0...5 1st maximum<>12");
 
-    r = hints.rectangles(0, 10);
+    r = hints.get_rectangles(0, 10);
     if (r.size() != 2) TEST_FAILED("Failed to extract i+j interval 0...10");
 
     if (r.front().x1 != 0) TEST_FAILED("i+j interval 0...10 1st x1<>0");
@@ -96,14 +95,14 @@ void rectangles()
     if (r.back().minimum != 0) TEST_FAILED("i+j interval 0...10 2nd minimum<>0");
     if (r.back().maximum != 18) TEST_FAILED("i+j interval 0...10 2nd maximum<>18");
 
-    r = hints.rectangles(0);
+    r = hints.get_rectangles(0);
     if (r.size() != 1) TEST_FAILED("i+j value 0 failed");
     if (r.front().x1 != 0) TEST_FAILED("i+j value 0 1st x1<>0");
     if (r.front().y1 != 0) TEST_FAILED("i+j value 0 1st y1<>0");
     if (r.front().x2 != 6) TEST_FAILED("i+j value 0 1st x2<>6");
     if (r.front().y2 != 6) TEST_FAILED("i+j value 0 1st y2<>6");
 
-    r = hints.rectangles(10);
+    r = hints.get_rectangles(10);
     if (r.size() != 2) TEST_FAILED("i+j value 10 failed");
     if (r.front().x1 != 0) TEST_FAILED("i+j value 0 1st x1<>0");
     if (r.front().y1 != 6) TEST_FAILED("i+j value 0 1st y1<>6");
