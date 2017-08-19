@@ -10,6 +10,8 @@ Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-tron
 Source0: %{name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot-%(%{__id_u} -n)
+BuildRequires: gcc-c++
+BuildRequires: make
 BuildRequires: boost-devel
 BuildRequires: geos-devel >= 3.4.2
 Requires: geos >= 3.4.2
