@@ -9,8 +9,8 @@
 #pragma once
 
 #include "Edge.h"
-#include "FlipSet.h"
 #include "FlipGrid.h"
+#include "FlipSet.h"
 #include "Missing.h"
 #include <cassert>
 #include <iostream>
@@ -897,7 +897,7 @@ class LinearInterpolation : public Traits
   // We must disallow non-convex cells such as V-shaped ones, since the intersections
   // formulas may then produce values outside the cell.
 
-  // Note that we permit colinear ajdacent edges, since for example in latlon grids
+  // Note that we permit colinear adjacent edges, since for example in latlon grids
   // the poles are represented by multiple grid points. This test thus passes the
   // redundant case of a rectangle with no area, but the rest of the code can handle it.
 

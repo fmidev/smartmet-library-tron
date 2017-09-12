@@ -72,7 +72,7 @@ class Contourer : public Interpolation<Traits>
   typedef typename Traits::coord_type coord_type;
   typedef typename Traits::value_type value_type;
   typedef Hints<Grid, Traits> hints_type;
-  typedef Hints<Grid, Traints> coordinate_hints_type;
+  typedef Hints<Grid, Traits> coordinate_hints_type;
 
   /*
    * Calculate polygon surrounding the given value range.
@@ -131,12 +131,13 @@ class Contourer : public Interpolation<Traits>
     MyFlipSet flipset;
     FlipGrid flipgrid(grid.width(), grid.height(), worlddata);
 
-    for (typename hints_type::return_type::const_iterator it = rects.begin(), end = rects.end();
+    for (typename hints_type::rectangles::const_iterator it = rects.begin(), end = rects.end();
          it != end;
          ++it)
     {
       for (typename Grid::size_type j = it->y1; j < it->y2; j++)
         for (typename Grid::size_type i = it->x1; i < it->x2; i++)
+        {
           Contourer::rectangle(grid.x(i, j),
                                grid.y(i, j),
                                grid(i, j),
@@ -155,6 +156,7 @@ class Contourer : public Interpolation<Traits>
                                hilimit,
                                flipset,
                                flipgrid);
+        }
     }
 
     if (worlddata)
@@ -197,15 +199,15 @@ class Contourer : public Interpolation<Traits>
                    value_type lolimit,
                    value_type hilimit,
                    bool worlddata,
-                   const hints_type::return_type& hints,
-                   const coordinate_hints_type::return_type& coordinate_hints)
+                   const typename hints_type::rectangles& hints,
+                   const typename coordinate_hints_type::rectangles& coordinate_hints)
   {
     typename hints_type::rectangles rects = hints.get_rectangles(lolimit, hilimit);
 
     MyFlipSet flipset;
     FlipGrid flipgrid(grid.width(), grid.height(), worlddata);
 
-    for (typename hints_type::return_type::const_iterator it = rects.begin(), end = rects.end();
+    for (typename hints_type::rectangles::const_iterator it = rects.begin(), end = rects.end();
          it != end;
          ++it)
     {
@@ -303,11 +305,11 @@ class Contourer : public Interpolation<Traits>
                    bool worlddata,
                    const hints_type& hints)
   {
-    typename hints_type::return_type rects = hints.rectangles(value);
+    typename hints_type::rectangles rects = hints.get_rectangles(value);
 
     MyFlipSet flipset;
 
-    for (typename hints_type::return_type::const_iterator it = rects.begin(), end = rects.end();
+    for (typename hints_type::rectangles::const_iterator it = rects.begin(), end = rects.end();
          it != end;
          ++it)
     {
