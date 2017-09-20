@@ -121,7 +121,9 @@ class Hints : public Traits
         {
           value_type value = theGrid(i, j);
           if (this->missing(value))
+          {
             hasmissing = true;
+          }
           else
           {
             minimum = std::min(value, minimum);
@@ -157,11 +159,11 @@ class Hints : public Traits
       theNode->itsRectangle.hasmissing =
           (theNode->itsLeft->itsRectangle.hasmissing | theNode->itsRight->itsRectangle.hasmissing);
 
-      const value_type& min1 = theNode->itsLeft->itsRectangle.minimum;
-      const value_type& max1 = theNode->itsLeft->itsRectangle.maximum;
+      const value_type min1 = theNode->itsLeft->itsRectangle.minimum;
+      const value_type max1 = theNode->itsLeft->itsRectangle.maximum;
 
-      const value_type& min2 = theNode->itsRight->itsRectangle.minimum;
-      const value_type& max2 = theNode->itsRight->itsRectangle.maximum;
+      const value_type min2 = theNode->itsRight->itsRectangle.minimum;
+      const value_type max2 = theNode->itsRight->itsRectangle.maximum;
 
       if (this->missing(min1))
       {
@@ -183,8 +185,8 @@ class Hints : public Traits
 
   bool rectangle_intersects(const Rectangle& theRectangle, value_type theValue) const
   {
-    const value_type& nodemin = theRectangle.minimum;
-    const value_type& nodemax = theRectangle.maximum;
+    const value_type nodemin = theRectangle.minimum;
+    const value_type nodemax = theRectangle.maximum;
     const bool nodemissing = this->missing(nodemin);  // no valid values at all?
 
     if (!this->missing(theValue))
@@ -203,8 +205,8 @@ class Hints : public Traits
                             value_type theLoLimit,
                             value_type theHiLimit) const
   {
-    const value_type& nodemin = theRectangle.minimum;
-    const value_type& nodemax = theRectangle.maximum;
+    const value_type nodemin = theRectangle.minimum;
+    const value_type nodemax = theRectangle.maximum;
     const bool nodemissing = this->missing(nodemin);  // no valid values at all?
 
     if (!this->missing(theLoLimit))
