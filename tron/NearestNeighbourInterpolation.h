@@ -9,8 +9,8 @@
 #pragma once
 
 #include "Edge.h"
-#include "FlipSet.h"
 #include "FlipGrid.h"
+#include "FlipSet.h"
 #include "Missing.h"
 
 namespace Tron
@@ -40,8 +40,8 @@ class NearestNeighbourInterpolation : public Traits
 
   static place_type placement(value_type value, value_type lo, value_type hi)
   {
-    if (value < lo && !NearestNeighbourInterpolation::missing(lo)) return Below;
-    if (value > hi && !NearestNeighbourInterpolation::missing(hi)) return Above;
+    if (!NearestNeighbourInterpolation::missing(lo) && value < lo) return Below;
+    if (!NearestNeighbourInterpolation::missing(hi) && value > hi) return Above;
     return Inside;
   }
 

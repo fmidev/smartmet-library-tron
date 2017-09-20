@@ -96,14 +96,14 @@ class LinearInterpolation : public Traits
 
   static place_type placement(value_type value, value_type lo, value_type hi)
   {
-    if (value < lo && !LinearInterpolation::missing(lo)) return Below;
-    if (value >= hi && !LinearInterpolation::missing(hi)) return Above;
+    if (!LinearInterpolation::missing(lo) && value < lo) return Below;
+    if (!LinearInterpolation::missing(hi) && value >= hi) return Above;
     return Inside;
   }
 
   static place_type placement(value_type value, value_type limit)
   {
-    if (value <= limit && !LinearInterpolation::missing(limit)) return Below;
+    if (!LinearInterpolation::missing(limit) && value <= limit) return Below;
     return Above;
   }
 

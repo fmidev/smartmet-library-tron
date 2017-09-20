@@ -28,6 +28,13 @@ struct NanMissing
   static bool missing(T value) { return isnan(value); }
 };
 
+// NaN and +-Inf are considered missing
+template <typename T>
+struct InfMissing
+{
+  static bool missing(T value) { return isinf(value) || isnan(value); }
+};
+
 // FMI specific case is stateless to avoid creation costs
 
 template <typename T>

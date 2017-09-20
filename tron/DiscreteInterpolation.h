@@ -15,8 +15,8 @@
 #pragma once
 
 #include "Edge.h"
-#include "FlipSet.h"
 #include "FlipGrid.h"
+#include "FlipSet.h"
 #include "Missing.h"
 
 namespace Tron
@@ -46,8 +46,8 @@ class DiscreteInterpolation : public Traits
 
   static place_type placement(value_type value, value_type lo, value_type hi)
   {
-    if (value < lo && !DiscreteInterpolation::missing(lo)) return Below;
-    if (value > hi && !DiscreteInterpolation::missing(hi)) return Above;
+    if (!DiscreteInterpolation::missing(lo) && value < lo) return Below;
+    if (!DiscreteInterpolation::missing(hi) && value > hi) return Above;
     return Inside;
   }
 

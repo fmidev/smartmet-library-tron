@@ -3,9 +3,11 @@ LIB = smartmet-$(SUBNAME)
 SPEC = smartmet-library-$(SUBNAME)
 INCDIR = smartmet/$(SUBNAME)
 
+# Note: Must not use -Ofast or similar which disable infinity handling
+
 FLAGS = -std=c++11 -fPIC -MD -Wall -W -Wno-unused-parameter -Wno-variadic-macros
 
-FLAGS_RELEASE = -DNDEBUG -Ofast -g
+FLAGS_RELEASE = -DNDEBUG -g
 
 FLAGS_DEBUG = -O2 -g \
         -Werror \

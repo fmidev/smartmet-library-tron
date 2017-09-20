@@ -9,8 +9,8 @@
 #pragma once
 
 #include "Edge.h"
-#include "FlipSet.h"
 #include "FlipGrid.h"
+#include "FlipSet.h"
 #include "Missing.h"
 #include <cassert>
 #include <iostream>
@@ -106,14 +106,14 @@ class LogLinearInterpolation : public Traits
 
   static place_type placement(value_type value, value_type lo, value_type hi)
   {
-    if (value < lo && !LogLinearInterpolation::missing(lo)) return Below;
-    if (value >= hi && !LogLinearInterpolation::missing(hi)) return Above;
+    if (!LogLinearInterpolation::missing(lo) && value < lo) return Below;
+    if (!LogLinearInterpolation::missing(hi) && value >= hi) return Above;
     return Inside;
   }
 
   static place_type placement(value_type value, value_type limit)
   {
-    if (value <= limit && !LogLinearInterpolation::missing(limit)) return Below;
+    if (!LogLinearInterpolation::missing(limit) && value <= limit) return Below;
     return Above;
   }
 
