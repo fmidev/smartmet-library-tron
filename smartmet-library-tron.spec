@@ -15,6 +15,8 @@ BuildRequires: make
 BuildRequires: boost-devel
 BuildRequires: geos-devel >= 3.4.2
 Requires: geos >= 3.4.2
+# Actually, this should only be required by the devel package
+Requires: geos-devel >= 3.4.2
 Provides: %{LIBNAME}
 Obsoletes: libsmartmet-tron < 17.1.4
 Obsoletes: libsmartmet-tron-debuginfo < 17.1.4
