@@ -72,7 +72,7 @@ class Contourer : public Interpolation<Traits>
   typedef typename Traits::coord_type coord_type;
   typedef typename Traits::value_type value_type;
   typedef Hints<Grid, Traits> hints_type;
-  typedef Hints<Grid, Traits> coordinate_hints_type;
+  typedef CoordinateHints<Grid, Traits> coordinate_hints_type;
 
   /*
    * Calculate polygon surrounding the given value range.
@@ -190,8 +190,7 @@ class Contourer : public Interpolation<Traits>
   }
 
   /*
-   * Calculate polygon surrounding the given value range. Process only the given
-   * list of coordinate rectangles using the prebuilt hints for them.
+   * Calculate polygon surrounding the given value range in a specific area.
    */
 
   static void fill(PathAdapter& path,
@@ -199,38 +198,61 @@ class Contourer : public Interpolation<Traits>
                    value_type lolimit,
                    value_type hilimit,
                    bool worlddata,
-                   const typename hints_type::rectangles& hints,
-                   const typename coordinate_hints_type::rectangles& coordinate_hints)
+                   const hints_type& hints,
+                   const coordinate_hints_type& coordinate_hints,
+                   coord_type xmin,
+                   coord_type ymin,
+                   coord_type xmax,
+                   coord_type ymax)
   {
     typename hints_type::rectangles rects = hints.get_rectangles(lolimit, hilimit);
+    typename coordinate_hints_type::rectangles crects =
+        coordinate_hints.get_rectangles(xmin, ymin, xmax, ymax);
 
     MyFlipSet flipset;
     FlipGrid flipgrid(grid.width(), grid.height(), worlddata);
 
-    for (typename hints_type::rectangles::const_iterator it = rects.begin(), end = rects.end();
-         it != end;
+    // Process only overlapping value/coordinate rectangles
+
+    for (typename hints_type::rectangles::const_iterator it = rects.begin(), iend = rects.end();
+         it != iend;
          ++it)
     {
-      for (typename Grid::size_type j = it->y1; j < it->y2; j++)
-        for (typename Grid::size_type i = it->x1; i < it->x2; i++)
-          Contourer::rectangle(grid.x(i, j),
-                               grid.y(i, j),
-                               grid(i, j),
-                               grid.x(i, j + 1),
-                               grid.y(i, j + 1),
-                               grid(i, j + 1),
-                               grid.x(i + 1, j + 1),
-                               grid.y(i + 1, j + 1),
-                               grid(i + 1, j + 1),
-                               grid.x(i + 1, j),
-                               grid.y(i + 1, j),
-                               grid(i + 1, j),
-                               static_cast<int>(i),
-                               static_cast<int>(j),
-                               lolimit,
-                               hilimit,
-                               flipset,
-                               flipgrid);
+      for (typename coordinate_hints_type::rectangles::const_iterator jt = crects.begin(),
+                                                                      jend = crects.end();
+           jt != jend;
+           ++jt)
+      {
+        // Overlapping area
+        typename Grid::size_type x1 = std::max(it->x1, jt->x1);
+        typename Grid::size_type y1 = std::max(it->y1, jt->y1);
+        typename Grid::size_type x2 = std::min(it->x2, jt->x2);
+        typename Grid::size_type y2 = std::min(it->y2, jt->y2);
+
+        if (x2 > x1 && y2 > y1)
+        {
+          for (typename Grid::size_type j = y1; j < y2; j++)
+            for (typename Grid::size_type i = x1; i < x2; i++)
+              Contourer::rectangle(grid.x(i, j),
+                                   grid.y(i, j),
+                                   grid(i, j),
+                                   grid.x(i, j + 1),
+                                   grid.y(i, j + 1),
+                                   grid(i, j + 1),
+                                   grid.x(i + 1, j + 1),
+                                   grid.y(i + 1, j + 1),
+                                   grid(i + 1, j + 1),
+                                   grid.x(i + 1, j),
+                                   grid.y(i + 1, j),
+                                   grid(i + 1, j),
+                                   static_cast<int>(i),
+                                   static_cast<int>(j),
+                                   lolimit,
+                                   hilimit,
+                                   flipset,
+                                   flipgrid);
+        }
+      }
     }
 
     if (worlddata)
@@ -329,6 +351,89 @@ class Contourer : public Interpolation<Traits>
                                grid(i + 1, j),
                                value,
                                flipset);
+    }
+
+    if (worlddata)
+    {
+      typename Grid::size_type i = grid.width() - 1;
+      for (typename Grid::size_type j = 0; j < grid.height() - 1; j++)
+        Contourer::rectangle(grid.x(i, j),
+                             grid.y(i, j),
+                             grid(i, j),
+                             grid.x(i, j + 1),
+                             grid.y(i, j + 1),
+                             grid(i, j + 1),
+                             grid.x(i + 1, j + 1),
+                             grid.y(i + 1, j + 1),
+                             grid(i + 1, j + 1),
+                             grid.x(i + 1, j),
+                             grid.y(i + 1, j),
+                             grid(i + 1, j),
+                             value,
+                             flipset);
+    }
+
+    flipset.prepare();
+    Builder::line<Traits>(flipset.edges(), path);
+  }
+
+  /*
+   * Calculate an isoline in the given area.
+   */
+
+  static void line(PathAdapter& path,
+                   const Grid& grid,
+                   value_type value,
+                   bool worlddata,
+                   const hints_type& hints,
+                   const coordinate_hints_type& coordinate_hints,
+                   coord_type xmin,
+                   coord_type ymin,
+                   coord_type xmax,
+                   coord_type ymax)
+
+  {
+    typename hints_type::rectangles rects = hints.get_rectangles(value);
+    typename coordinate_hints_type::rectangles crects =
+        coordinate_hints.get_rectangles(xmin, ymin, xmax, ymax);
+
+    MyFlipSet flipset;
+
+    for (typename hints_type::rectangles::const_iterator it = rects.begin(), iend = rects.end();
+         it != iend;
+         ++it)
+    {
+      for (typename coordinate_hints_type::rectangles::const_iterator jt = crects.begin(),
+                                                                      jend = crects.end();
+           jt != jend;
+           ++jt)
+      {
+        // Overlapping area
+        typename Grid::size_type x1 = std::max(it->x1, jt->x1);
+        typename Grid::size_type y1 = std::max(it->y1, jt->y1);
+        typename Grid::size_type x2 = std::min(it->x2, jt->x2);
+        typename Grid::size_type y2 = std::min(it->y2, jt->y2);
+
+        if (x2 > x1 && y2 > y1)
+        {
+          for (typename Grid::size_type j = it->y1; j < it->y2; j++)
+            for (typename Grid::size_type i = it->x1; i < it->x2; i++)
+              Contourer::rectangle(grid.x(i, j),
+                                   grid.y(i, j),
+                                   grid(i, j),
+                                   grid.x(i, j + 1),
+                                   grid.y(i, j + 1),
+                                   grid(i, j + 1),
+                                   grid.x(i + 1, j + 1),
+                                   grid.y(i + 1, j + 1),
+                                   grid(i + 1, j + 1),
+                                   grid.x(i + 1, j),
+                                   grid.y(i + 1, j),
+                                   grid(i + 1, j),
+                                   value,
+                                   flipset);
+        }
+      }
     }
 
     if (worlddata)
