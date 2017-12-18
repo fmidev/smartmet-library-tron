@@ -150,9 +150,10 @@ template <typename Edges>
 long pick_free_edge(const Edges &edges, const Targets &targets, long index)
 {
   const std::size_t ntargets = targets.size();
-  for (; index < ntargets; ++index)
+  std::size_t i = boost::numeric_cast<std::size_t>(index);
+  for (; i < ntargets; ++i)
   {
-    if (targets[index] < 0) return index;
+    if (targets[i] < 0) return i;
   }
   return -1;
 }
@@ -167,6 +168,8 @@ template <typename Polyline, typename Edges>
 long find_first_match(
     const Polyline &polyline, const Edges &edges, const Targets &targets, long pos, long lastpos)
 {
+  const long nedges = boost::numeric_cast<long>(edges.size());
+
   // Last coordinate of the polyline
   const typename Polyline::value_type &endcoordinate = polyline.back();
 
@@ -175,7 +178,7 @@ long find_first_match(
 
   pos += pos - lastpos;
   if (pos < 0) pos = 0;
-  if (pos >= edges.size()) pos = edges.size() - 1;
+  if (pos >= nedges) pos = nedges - 1;
 
   // Note: The last coordinate can never be the same as the start coordinate at the hint,
   // that would mean there was a 0-length edge.
@@ -196,7 +199,7 @@ long find_first_match(
   else
   {
     // Search right for the first match or a greater coordinate
-    for (++pos; pos < edges.size(); ++pos)
+    for (++pos; pos < nedges; ++pos)
     {
       if (edges[pos] < endcoordinate)
       {
@@ -241,7 +244,8 @@ long pick_best_match(const Polylines &polylines,
 
   // Handle quickly the most common case of exactly one match
 
-  std::size_t nedges = edges.size();
+  const long npolylines = boost::numeric_cast<long>(polylines.size());
+  const long nedges = boost::numeric_cast<long>(edges.size());
 
 #ifdef OPTIMIZE_ONE_CHOICE
   // This optimization is not robust for polylines
@@ -255,7 +259,7 @@ long pick_best_match(const Polylines &polylines,
     if (targets[pos] == polylineindex)
       *self_touch = true;
 
-    else if (targets[pos] >= polylines.size())
+    else if (targets[pos] >= npolylines)
       throw std::runtime_error(
           "Internal error trying to build a valid geometry, target polygon number overflow");
 
@@ -275,7 +279,7 @@ long pick_best_match(const Polylines &polylines,
 
   std::vector<long> available;
 
-  for (std::size_t i = pos; i < nedges; i++)
+  for (long i = pos; i < nedges; i++)
   {
     if (!(edges[i] == endcoordinate)) break;
     if (targets[i] < 0)
@@ -323,7 +327,7 @@ long pick_best_match(const Polylines &polylines,
   // We're extending an old isoline if the best match is not closed. We also know it
   // will never be closed, otherwise the algorithm would have closed it already.
 
-  if (targets[bestpos] >= 0 && targets[bestpos] < polylines.size())
+  if (targets[bestpos] >= 0 && targets[bestpos] < npolylines)
   {
     *isoline_extension = !polylines[targets[bestpos]].closed();
   }
@@ -819,6 +823,6 @@ void line(const Edges &theEdges, FmiBuilder &theAdapter)
 {
   theAdapter.build<Traits>(theEdges, false);
 }
-}
+}  // namespace Builder
 
 }  // namespace Tron
