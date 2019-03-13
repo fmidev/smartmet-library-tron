@@ -4,7 +4,7 @@
 Summary: tron library
 Name: %{SPECNAME}
 Version: 17.9.20
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-tron
