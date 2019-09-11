@@ -1,6 +1,7 @@
 %define DIRNAME tron
 %define LIBNAME smartmet-%{DIRNAME}
 %define SPECNAME smartmet-library-%{DIRNAME}
+%define debug_package %{nil}
 Summary: tron library
 Name: %{SPECNAME}
 Version: 17.9.20
