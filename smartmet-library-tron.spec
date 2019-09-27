@@ -1,10 +1,11 @@
 %define DIRNAME tron
 %define LIBNAME smartmet-%{DIRNAME}
 %define SPECNAME smartmet-library-%{DIRNAME}
+%define debug_package %{nil}
 Summary: tron library
 Name: %{SPECNAME}
 Version: 17.9.20
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-tron
@@ -21,6 +22,10 @@ Requires: geos-devel >= 3.4.2
 Provides: %{LIBNAME}
 Obsoletes: libsmartmet-tron < 17.1.4
 Obsoletes: libsmartmet-tron-debuginfo < 17.1.4
+#TestRequires: boost-devel
+#TestRequires: gcc-c++
+#TestRequires: smartmet-library-gis-devel
+#TestRequires: smartmet-library-regression
 
 %description
 FMI tron contouring library
