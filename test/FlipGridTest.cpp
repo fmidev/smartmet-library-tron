@@ -5,8 +5,8 @@
  */
 // ======================================================================
 
-#include "FlipGrid.h"
 #include "Edge.h"
+#include "FlipGrid.h"
 #include "FlipSet.h"
 #include "Traits.h"
 #include <regression/tframe.h>
@@ -58,6 +58,7 @@ class Grid
   coord_type x(size_type i, size_type j) const { return i; }
   coord_type y(size_type i, size_type j) const { return j; }
   Grid(size_type i, size_type j) : itsWidth(i), itsHeight(j), itsData(itsWidth * itsHeight, 0) {}
+
  private:
   Grid();
   size_type itsWidth;

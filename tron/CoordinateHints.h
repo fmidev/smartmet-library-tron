@@ -30,7 +30,7 @@
 #pragma once
 
 #include "Missing.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <stdexcept>
 #include <vector>
 
@@ -88,13 +88,13 @@ class CoordinateHints : public Traits
   struct RecursiveInfo
   {
     Rectangle itsRectangle;
-    boost::shared_ptr<RecursiveInfo> itsLeft;
-    boost::shared_ptr<RecursiveInfo> itsRight;
+    std::shared_ptr<RecursiveInfo> itsLeft;
+    std::shared_ptr<RecursiveInfo> itsRight;
   };
 
   size_type itsMaxSize;
 
-  typedef boost::shared_ptr<RecursiveInfo> node_type;
+  typedef std::shared_ptr<RecursiveInfo> node_type;
   node_type itsRoot;
 
   void recurse(node_type& theNode,

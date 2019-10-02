@@ -16,6 +16,6 @@ struct Traits : public Missing<Value>
   typedef Value value_type;
   typedef Coordinate coord_type;
 };
-}
+}  // namespace Tron
 
 // ======================================================================

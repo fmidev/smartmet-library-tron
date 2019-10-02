@@ -234,5 +234,5 @@ int* coeffs[6][5] = {{coeffs_3_1, coeffs_3_2, 0, 0, 0},
                      {coeffs_9_1, coeffs_9_2, coeffs_9_3, coeffs_9_4, coeffs_9_5},
                      {coeffs_11_1, coeffs_11_2, coeffs_11_3, coeffs_11_4, coeffs_11_5},
                      {coeffs_13_1, coeffs_13_2, coeffs_13_3, coeffs_13_4, coeffs_13_5}};
-}
-}  // namespace Tron::SavitzkyGolay2DCoefficients
+}  // namespace SavitzkyGolay2DCoefficients
+}  // namespace Tron

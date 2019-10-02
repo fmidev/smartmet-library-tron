@@ -5,14 +5,14 @@
  */
 // ======================================================================
 
-#include <iostream>
 #include "SavitzkyGolay2D.h"
 #include <regression/tframe.h>
-#include <string>
-#include <sstream>
-#include <vector>
 #include <cmath>
 #include <cstdlib>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
 
 using namespace std;
 
@@ -48,6 +48,7 @@ class Matrix
   }
 
   void swap(Matrix& other) { itsData.swap(other.itsData); }
+
  private:
   Matrix();
   size_type itsWidth;

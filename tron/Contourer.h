@@ -62,7 +62,8 @@ namespace Tron
 template <typename Grid,
           typename PathAdapter,
           typename Traits,
-          template <typename> class Interpolation>
+          template <typename>
+          class Interpolation>
 class Contourer : public Interpolation<Traits>
 {
  private:

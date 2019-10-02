@@ -69,7 +69,7 @@ class tests : public tframe::tests
   void test(void) { TEST(comparisons); }
 };
 
-}  // namespace Edge
+}  // namespace EdgeTest
 
 //! The main program
 int main(void)

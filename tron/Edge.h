@@ -108,6 +108,6 @@ struct hash<Tron::Edge<Traits> >
     return hash;
   }
 };
-}
+}  // namespace std
 
 // ======================================================================

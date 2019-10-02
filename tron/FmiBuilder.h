@@ -54,8 +54,8 @@ l* Building utility for FMI.
 
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
+#include <memory>
 
 #include <cmath>
 #include <map>
@@ -67,18 +67,18 @@ class FmiBuilder : private boost::noncopyable
 {
  public:
   ~FmiBuilder();
-  FmiBuilder(boost::shared_ptr<geos::geom::GeometryFactory> theFactory);
-  boost::shared_ptr<geos::geom::Geometry> result();
+  FmiBuilder(std::shared_ptr<geos::geom::GeometryFactory> theFactory);
+  std::shared_ptr<geos::geom::Geometry> result();
 
   template <typename Traits, typename Edges>
   void build(const Edges &theEdges, bool fillmode);
 
  private:
   // The final result
-  boost::shared_ptr<geos::geom::Geometry> itsResult;
+  std::shared_ptr<geos::geom::Geometry> itsResult;
 
   // Used while building:
-  boost::shared_ptr<geos::geom::GeometryFactory> itsFactory;
+  std::shared_ptr<geos::geom::GeometryFactory> itsFactory;
 
 };  // class FmiBuilder
 
@@ -95,7 +95,7 @@ typedef std::vector<std::size_t> EdgeFromRing;
  */
 // ----------------------------------------------------------------------
 
-inline void validate(boost::shared_ptr<geos::geom::Geometry> geom)
+inline void validate(std::shared_ptr<geos::geom::Geometry> geom)
 {
   if (!geom) return;
 #if 0

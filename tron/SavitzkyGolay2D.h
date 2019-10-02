@@ -9,8 +9,8 @@
 
 #include "MirrorMatrix.h"
 #include "SavitzkyGolay2DCoefficients.h"
-#include <stdexcept>
 #include <cmath>
+#include <stdexcept>
 
 namespace Tron
 {
@@ -57,5 +57,5 @@ void smooth(Grid& input, std::size_t length, std::size_t degree)
 
   input.swap(grid);
 }
-}
-}  // namespace Tron::SavitzkyGolay2D
+}  // namespace SavitzkyGolay2D
+}  // namespace Tron

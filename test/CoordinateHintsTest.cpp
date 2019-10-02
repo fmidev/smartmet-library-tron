@@ -108,7 +108,7 @@ class tests : public tframe::tests
   void test(void) { TEST(rectangles); }
 };
 
-}  // namespace HintsTest
+}  // namespace CoordinateHintsTest
 
 //! The main program
 int main(void)

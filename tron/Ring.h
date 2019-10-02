@@ -22,8 +22,8 @@
 #include <iostream>
 #include <limits>
 #include <list>
-#include <string>
 #include <sstream>
+#include <string>
 
 namespace Tron
 {
@@ -170,6 +170,7 @@ class Ring
 
   // For speed
   void swap(Ring& other) { std::swap(itsData, other.itsData); }
+
  private:
   storage_type itsData;
   // The user won't see these changing

@@ -5,7 +5,7 @@ INCDIR = smartmet/$(SUBNAME)
 
 # Note: Must not use -Ofast or similar which disable infinity handling
 
-FLAGS = -std=c++11 -fPIC -MD -Wall -W -Wno-unused-parameter -Wno-variadic-macros -fsanitize=thread
+FLAGS = -std=c++11 -fPIC -MD -Wall -W -Wno-unused-parameter -Wno-variadic-macros
 
 FLAGS_RELEASE = -DNDEBUG -O2 -g
 
