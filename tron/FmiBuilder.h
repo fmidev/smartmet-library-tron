@@ -42,6 +42,10 @@ l* Building utility for FMI.
 
 #include "Ring.h"
 
+#include <boost/foreach.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/optional.hpp>
+#include <boost/utility.hpp>
 #include <geos/algorithm/CGAlgorithms.h>
 #include <geos/geom/CoordinateArraySequence.h>
 #include <geos/geom/CoordinateSequenceFactory.h>
@@ -51,14 +55,9 @@ l* Building utility for FMI.
 #include <geos/geom/Polygon.h>
 #include <geos/io/WKTWriter.h>
 #include <geos/operation/valid/IsValidOp.h>
-
-#include <boost/foreach.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/utility.hpp>
-#include <memory>
-
 #include <cmath>
 #include <map>
+#include <memory>
 #include <vector>
 
 namespace Tron
@@ -376,11 +375,11 @@ std::size_t representative_edge(const Edges &edges, const EdgeIndexes &edgeindex
 // ----------------------------------------------------------------------
 
 template <typename Edges>
-std::size_t find_shell(const Targets &targets,
-                       const Edges &edges,
-                       std::size_t edgeindex,
-                       std::size_t holeindex,
-                       double maxedgewidth)
+boost::optional<std::size_t> find_shell(const Targets &targets,
+                                        const Edges &edges,
+                                        std::size_t edgeindex,
+                                        std::size_t holeindex,
+                                        double maxedgewidth)
 {
   // Pick the center of the edge chosen for the hole as the
   // start point of the vertical sweep. We choose the middle since
@@ -479,7 +478,8 @@ std::size_t find_shell(const Targets &targets,
     if (counts[polyline] % 2 != 0) return polyline;
   }
 
-  throw std::runtime_error("Failed to assign hole to a shell");
+  return {};
+  // throw std::runtime_error("Failed to assign hole to a shell");
 }
 
 // ----------------------------------------------------------------------
@@ -739,20 +739,30 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
 
     if (!polyline.isClockWise())
     {
-      gg::CoordinateSequence *cl = new gg::CoordinateArraySequence();
-      for (typename Ring<Traits>::const_iterator it = polyline.begin(); it != polyline.end(); ++it)
-        cl->add(gg::Coordinate(it->first, it->second));
-      gg::LinearRing *lr = itsFactory->createLinearRing(cl);
-
       // Polyline index
-      std::size_t idx = find_shell(targets, edges, ringedge[i], i, maxedgewidth);
+      auto idx = find_shell(targets, edges, ringedge[i], i, maxedgewidth);
 
-      // std::cout << "HOLE " << i << " HAS SHELL " << idx << std::endl;
+      if (!idx)
+      {
+        // This may happen if the grid coordinates are not topologically sound.
+        // For example PROJ.4 may produce unexpected/duplicate coordinates for poles in some
+        // projections std::cout << "Warning: unassigned hole found\n";
+      }
+      else
+      {
+        // std::cout << "HOLE " << i << " HAS SHELL " << idx << std::endl;
 
-      // Append the hole index for the shell
-      shellholes[shellindexes[idx]].push_back(holes.size());
+        // Append the hole index for the shell
+        shellholes[shellindexes[*idx]].push_back(holes.size());
 
-      holes.push_back(lr);
+        gg::CoordinateSequence *cl = new gg::CoordinateArraySequence();
+        for (typename Ring<Traits>::const_iterator it = polyline.begin(); it != polyline.end();
+             ++it)
+          cl->add(gg::Coordinate(it->first, it->second));
+        gg::LinearRing *lr = itsFactory->createLinearRing(cl);
+
+        holes.push_back(lr);
+      }
     }
   }
 
