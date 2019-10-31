@@ -45,6 +45,7 @@ l* Building utility for FMI.
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/optional.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
 #include <geos/algorithm/CGAlgorithms.h>
 #include <geos/geom/CoordinateArraySequence.h>
@@ -66,18 +67,18 @@ class FmiBuilder : private boost::noncopyable
 {
  public:
   ~FmiBuilder();
-  FmiBuilder(std::shared_ptr<geos::geom::GeometryFactory> theFactory);
-  std::shared_ptr<geos::geom::Geometry> result();
+  FmiBuilder(boost::shared_ptr<geos::geom::GeometryFactory> theFactory);
+  boost::shared_ptr<geos::geom::Geometry> result();
 
   template <typename Traits, typename Edges>
   void build(const Edges &theEdges, bool fillmode);
 
  private:
   // The final result
-  std::shared_ptr<geos::geom::Geometry> itsResult;
+  boost::shared_ptr<geos::geom::Geometry> itsResult;
 
   // Used while building:
-  std::shared_ptr<geos::geom::GeometryFactory> itsFactory;
+  boost::shared_ptr<geos::geom::GeometryFactory> itsFactory;
 
 };  // class FmiBuilder
 
@@ -94,7 +95,7 @@ typedef std::vector<std::size_t> EdgeFromRing;
  */
 // ----------------------------------------------------------------------
 
-inline void validate(std::shared_ptr<geos::geom::Geometry> geom)
+inline void validate(boost::shared_ptr<geos::geom::Geometry> geom)
 {
   if (!geom) return;
 #if 0

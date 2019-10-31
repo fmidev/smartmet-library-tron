@@ -35,7 +35,7 @@ std::size_t hash_value(const point &p)
  */
 // ----------------------------------------------------------------------
 
-FmiBuilder::FmiBuilder(std::shared_ptr<geos::geom::GeometryFactory> theFactory)
+FmiBuilder::FmiBuilder(boost::shared_ptr<geos::geom::GeometryFactory> theFactory)
     : itsResult(), itsFactory(theFactory)
 {
 }
@@ -53,5 +53,5 @@ FmiBuilder::~FmiBuilder() {}
  */
 // ----------------------------------------------------------------------
 
-std::shared_ptr<geos::geom::Geometry> FmiBuilder::result() { return itsResult; }
+boost::shared_ptr<geos::geom::Geometry> FmiBuilder::result() { return itsResult; }
 }  // namespace Tron
