@@ -641,8 +641,8 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
         {
           // Discard empty rings - should not happen unless coordinates are degenerate
           std::cout << "Warning: Discarding empty ring created by contouring" << std::endl;
-          Polyline tmp;
-          std::swap(tmp, polyline);
+          Polyline emptyline;
+          std::swap(emptyline, polyline);
         }
         break;
       }
