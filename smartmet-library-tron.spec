@@ -4,7 +4,7 @@
 %define debug_package %{nil}
 Summary: tron library
 Name: %{SPECNAME}
-Version: 19.11.1
+Version: 19.12.4
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -50,6 +50,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/lib%{LIBNAME}.a
 
 %changelog
+* Wed Dec  4 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.12.4-1.fmi
+- Use -fno-omit-frame-pointer for a better profiling and debugging experience                                                                                              
 * Fri Nov  1 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.11.1-1.fmi
 - Silence compiler warnings by avoiding shadowing of local variables
 
