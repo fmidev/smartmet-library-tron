@@ -15,7 +15,7 @@ DIFFICULTFLAGS = -Weffc++ -Wunreachable-code -Wredundant-decls
 CC = g++
 CFLAGS = -DUNIX -MD -O0 -g $(MAINFLAGS)
 INCLUDES = -I ../tron -I /usr/include/smartmet
-LIBS = -L .. -lsmartmet-tron -lsmartmet-gis -lgeos
+LIBS = -L .. -lsmartmet-tron -lsmartmet-gis -L/usr/geos38/lib64 -lgeos
 
 all: $(PROG)
 clean:

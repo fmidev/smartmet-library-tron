@@ -42,16 +42,9 @@ FmiBuilder::FmiBuilder(std::shared_ptr<geos::geom::GeometryFactory> theFactory)
 
 // ----------------------------------------------------------------------
 /*!
- * \brief Clean up in case the result() method is never called
- */
-// ----------------------------------------------------------------------
-
-FmiBuilder::~FmiBuilder() {}
-// ----------------------------------------------------------------------
-/*!
  * \brief Return the final result
  */
 // ----------------------------------------------------------------------
 
-std::shared_ptr<geos::geom::Geometry> FmiBuilder::result() { return itsResult; }
+std::unique_ptr<geos::geom::Geometry> FmiBuilder::result() { return std::move(itsResult); }
 }  // namespace Tron

@@ -3,9 +3,12 @@ LIB = smartmet-$(SUBNAME)
 SPEC = smartmet-library-$(SUBNAME)
 INCDIR = smartmet/$(SUBNAME)
 
+-include $(HOME)/.smartmet.mk
+GCC_DIAG_COLOR ?= always
+
 # Note: Must not use -Ofast or similar which disable infinity handling
 
-FLAGS = -std=c++11 -fPIC -MD -Wall -W -Wno-unused-parameter -Wno-variadic-macros
+FLAGS = -std=c++11 -fPIC -MD -Wall -W -Wno-unused-parameter -Wno-variadic-macros -fdiagnostics-color=$(GCC_DIAG_COLOR)
 
 FLAGS_RELEASE = -DNDEBUG -O2 -g
 
@@ -29,7 +32,7 @@ ARFLAGS = -r
 
 # Default compiler flags
 
-DEFINES = -DUNIX
+DEFINES = -DUNIX -DUSE_UNSTABLE_GEOS_CPP_API
 
 CFLAGS_RELEASE = $(DEFINES) $(FLAGS) $(FLAGS_RELEASE)
 CFLAGS_DEBUG   = $(DEFINES) $(FLAGS) $(FLAGS_DEBUG)
@@ -42,7 +45,7 @@ endif
 
 LDFLAGS = 
 
-INCLUDES = -I$(includedir)
+INCLUDES = -I$(includedir) -I/usr/geos38/include
 
 LIBS = -L$(libdir)
 

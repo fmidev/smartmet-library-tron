@@ -46,7 +46,7 @@ l* Building utility for FMI.
 #include <boost/lexical_cast.hpp>
 #include <boost/optional.hpp>
 #include <boost/utility.hpp>
-#include <geos/algorithm/CGAlgorithms.h>
+#include <geos/algorithm/CGAlgorithmsDD.h>
 #include <geos/geom/CoordinateArraySequence.h>
 #include <geos/geom/CoordinateSequenceFactory.h>
 #include <geos/geom/GeometryFactory.h>
@@ -65,16 +65,19 @@ namespace Tron
 class FmiBuilder : private boost::noncopyable
 {
  public:
-  ~FmiBuilder();
+  ~FmiBuilder() = default;
+  FmiBuilder(const FmiBuilder &other) = delete;
+  FmiBuilder &operator=(const FmiBuilder &other) = delete;
+
   FmiBuilder(std::shared_ptr<geos::geom::GeometryFactory> theFactory);
-  std::shared_ptr<geos::geom::Geometry> result();
+  std::unique_ptr<geos::geom::Geometry> result();
 
   template <typename Traits, typename Edges>
   void build(const Edges &theEdges, bool fillmode);
 
  private:
   // The final result
-  std::shared_ptr<geos::geom::Geometry> itsResult;
+  std::unique_ptr<geos::geom::Geometry> itsResult;
 
   // Used while building:
   std::shared_ptr<geos::geom::GeometryFactory> itsFactory;
@@ -94,7 +97,7 @@ typedef std::vector<std::size_t> EdgeFromRing;
  */
 // ----------------------------------------------------------------------
 
-inline void validate(std::shared_ptr<geos::geom::Geometry> geom)
+inline void validate(const std::unique_ptr<geos::geom::Geometry> &geom)
 {
   if (!geom) return;
 #if 0
@@ -653,7 +656,7 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
 
   if (polylines.empty())
   {
-    itsResult.reset(itsFactory->createEmptyGeometry());
+    itsResult = itsFactory->createEmptyGeometry();
     return;
   }
 
@@ -664,9 +667,14 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
     for (std::size_t i = 0; i < polylines.size(); i++)
     {
       const Polyline &polyline = polylines[i];
-      gg::CoordinateSequence *cl = new gg::CoordinateArraySequence();
+
+      std::vector<gg::Coordinate> points;
+      points.reserve(points.size());
       for (typename Ring<Traits>::const_iterator it = polyline.begin(); it != polyline.end(); ++it)
-        cl->add(gg::Coordinate(it->first, it->second));
+        points.emplace_back(gg::Coordinate(it->first, it->second));
+
+      gg::CoordinateSequence *cl = new gg::CoordinateArraySequence();
+      cl->setPoints(points);
 
       gg::LineString *ls = itsFactory->createLineString(cl);
 
@@ -718,9 +726,14 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
 
     if (polyline.isClockWise())
     {
-      gg::CoordinateSequence *cl = new gg::CoordinateArraySequence();
+      std::vector<gg::Coordinate> points;
+      points.reserve(points.size());
       for (typename Ring<Traits>::const_iterator it = polyline.begin(); it != polyline.end(); ++it)
-        cl->add(gg::Coordinate(it->first, it->second));
+        points.emplace_back(gg::Coordinate(it->first, it->second));
+
+      gg::CoordinateSequence *cl = new gg::CoordinateArraySequence();
+      cl->setPoints(points);
+
       gg::LinearRing *lr = itsFactory->createLinearRing(cl);
 
       shellindexes[i] = shells.size();
@@ -755,10 +768,15 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
         // Append the hole index for the shell
         shellholes[shellindexes[*idx]].push_back(holes.size());
 
-        gg::CoordinateSequence *cl = new gg::CoordinateArraySequence();
+        std::vector<gg::Coordinate> points;
+        points.reserve(points.size());
         for (typename Ring<Traits>::const_iterator it = polyline.begin(); it != polyline.end();
              ++it)
-          cl->add(gg::Coordinate(it->first, it->second));
+          points.emplace_back(gg::Coordinate(it->first, it->second));
+
+        gg::CoordinateSequence *cl = new gg::CoordinateArraySequence();
+        cl->setPoints(points);
+
         gg::LinearRing *lr = itsFactory->createLinearRing(cl);
 
         holes.push_back(lr);
@@ -779,7 +797,7 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
   {
     for (std::size_t i = 0; i < shells.size(); i++)
     {
-      std::vector<gg::Geometry *> *holetransfer = NULL;
+      std::vector<gg::LinearRing *> *holetransfer = NULL;
 
       const std::vector<std::size_t> &holeindexes = shellholes[i];
 
@@ -789,7 +807,8 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
         // std::cout << "Shell " << i << " has hole " << holeindexes[j] << std::endl;
         holetransfer->push_back(holes[holeindexes[j]]);
       }
-      geom->push_back(itsFactory->createPolygon(shells[i], holetransfer));
+      auto &&foo = itsFactory->createPolygon(shells[i], holetransfer);
+      geom->push_back(foo);
     }
   }
 
