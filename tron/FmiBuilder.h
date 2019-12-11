@@ -69,7 +69,7 @@ class FmiBuilder : private boost::noncopyable
   FmiBuilder(const FmiBuilder &other) = delete;
   FmiBuilder &operator=(const FmiBuilder &other) = delete;
 
-  FmiBuilder(std::shared_ptr<geos::geom::GeometryFactory> theFactory);
+  FmiBuilder(const geos::geom::GeometryFactory &theFactory);
   std::unique_ptr<geos::geom::Geometry> result();
 
   template <typename Traits, typename Edges>
@@ -80,7 +80,7 @@ class FmiBuilder : private boost::noncopyable
   std::unique_ptr<geos::geom::Geometry> itsResult;
 
   // Used while building:
-  std::shared_ptr<geos::geom::GeometryFactory> itsFactory;
+  const geos::geom::GeometryFactory &itsFactory;
 
 };  // class FmiBuilder
 
@@ -656,7 +656,7 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
 
   if (polylines.empty())
   {
-    itsResult = itsFactory->createEmptyGeometry();
+    itsResult = itsFactory.createEmptyGeometry();
     return;
   }
 
@@ -676,7 +676,7 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
       gg::CoordinateSequence *cl = new gg::CoordinateArraySequence();
       cl->setPoints(points);
 
-      gg::LineString *ls = itsFactory->createLineString(cl);
+      gg::LineString *ls = itsFactory.createLineString(cl);
 
       geos::io::WKTWriter writer;
       lines.push_back(ls);
@@ -692,7 +692,7 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
       std::vector<gg::Geometry *> *parts = new std::vector<geos::geom::Geometry *>;
       for (std::size_t i = 0; i < lines.size(); i++)
         parts->push_back(lines[i]);
-      itsResult.reset(itsFactory->createMultiLineString(parts));
+      itsResult.reset(itsFactory.createMultiLineString(parts));
     }
     itsResult->normalize();
     validate(itsResult);
@@ -734,7 +734,7 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
       gg::CoordinateSequence *cl = new gg::CoordinateArraySequence();
       cl->setPoints(points);
 
-      gg::LinearRing *lr = itsFactory->createLinearRing(cl);
+      gg::LinearRing *lr = itsFactory.createLinearRing(cl);
 
       shellindexes[i] = shells.size();
       shells.push_back(lr);
@@ -777,7 +777,7 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
         gg::CoordinateSequence *cl = new gg::CoordinateArraySequence();
         cl->setPoints(points);
 
-        gg::LinearRing *lr = itsFactory->createLinearRing(cl);
+        gg::LinearRing *lr = itsFactory.createLinearRing(cl);
 
         holes.push_back(lr);
       }
@@ -791,7 +791,7 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
   if (holes.empty())
   {
     for (std::size_t i = 0; i < shells.size(); i++)
-      geom->push_back(itsFactory->createPolygon(shells[i], NULL));
+      geom->push_back(itsFactory.createPolygon(shells[i], NULL));
   }
   else
   {
@@ -807,7 +807,7 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
         // std::cout << "Shell " << i << " has hole " << holeindexes[j] << std::endl;
         holetransfer->push_back(holes[holeindexes[j]]);
       }
-      auto &&foo = itsFactory->createPolygon(shells[i], holetransfer);
+      auto &&foo = itsFactory.createPolygon(shells[i], holetransfer);
       geom->push_back(foo);
     }
   }
@@ -820,7 +820,7 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
     delete geom;
   }
   else
-    multipolygon = itsFactory->createMultiPolygon(geom);
+    multipolygon = itsFactory.createMultiPolygon(geom);
 
   itsResult.reset(multipolygon);
   itsResult->normalize();

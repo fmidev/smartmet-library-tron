@@ -35,7 +35,7 @@ std::size_t hash_value(const point &p)
  */
 // ----------------------------------------------------------------------
 
-FmiBuilder::FmiBuilder(std::shared_ptr<geos::geom::GeometryFactory> theFactory)
+FmiBuilder::FmiBuilder(const geos::geom::GeometryFactory &theFactory)
     : itsResult(), itsFactory(theFactory)
 {
 }
