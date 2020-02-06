@@ -5,7 +5,11 @@ INCDIR = smartmet/$(SUBNAME)
 
 # Note: Must not use -Ofast or similar which disable infinity handling
 
-FLAGS = -std=c++11 -fPIC -MD -fno-omit-frame-pointer -Wall -W -Wno-unused-parameter -Wno-variadic-macros
+-include $(HOME)/.smartmet.mk
+GCC_DIAG_COLOR ?= always
+CXX_STD ?= c++11
+
+FLAGS = -std=$(CXX_STD) -fPIC -MD -fno-omit-frame-pointer -Wall -W -Wno-unused-parameter -Wno-variadic-macros
 
 FLAGS_RELEASE = -DNDEBUG -O2 -g
 
