@@ -803,7 +803,7 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
 
       for (std::size_t j = 0; j < holeindexes.size(); j++)
       {
-        if (!holetransfer) holetransfer = new std::vector<gg::Geometry *>;
+        if (!holetransfer) holetransfer = new std::vector<gg::LinearRing *>;
         // std::cout << "Shell " << i << " has hole " << holeindexes[j] << std::endl;
         holetransfer->push_back(holes[holeindexes[j]]);
       }
