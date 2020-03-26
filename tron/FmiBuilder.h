@@ -70,6 +70,7 @@ class FmiBuilder : private boost::noncopyable
   FmiBuilder &operator=(const FmiBuilder &other) = delete;
 
   FmiBuilder(const geos::geom::GeometryFactory &theFactory);
+
   std::unique_ptr<geos::geom::Geometry> result();
 
   template <typename Traits, typename Edges>
