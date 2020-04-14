@@ -4,7 +4,7 @@
 %define debug_package %{nil}
 Summary: tron library
 Name: %{SPECNAME}
-Version: 20.3.26
+Version: 20.4.12
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -48,6 +48,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/lib%{LIBNAME}.a
 
 %changelog
+* Sun Apr 12 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.12-1.fmi
+- Moved grid validation outside to smartmet-library-gis
+
+* Thu Apr  9 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.9-1.fmi
+- Discard oblong grid cells (dx,dy ratio > 100) when contouring due to suspect coordinates
+
 * Thu Mar 26 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.3.26-1.fmi
 - Repackaged after GEOS 3.8 update
 
@@ -59,7 +65,6 @@ rm -rf $RPM_BUILD_ROOT
 
 * Wed Dec  4 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.12.4-1.fmi
 - Use -fno-omit-frame-pointer for a better profiling and debugging experience                                                                                              
-
 * Fri Nov  1 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.11.1-1.fmi
 - Silence compiler warnings by avoiding shadowing of local variables
 

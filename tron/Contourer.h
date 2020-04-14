@@ -14,6 +14,7 @@
  *    const value_type & operator()(size_type i, size_type j) const;
  *    coord_type x()(size_type i, size_type j) const;
  *    coord_type y()(size_type i, size_type j) const;
+ *    book valid()(size_type i, size_type j) const; // Is cell starting at i,j valid?
  *
  *    size_type width() const;
  *    size_type height() const;
@@ -43,6 +44,9 @@
  *          |  |       /  \
  *          +--+      +----+
  *         1    4     1    3
+ *
+ * Note: valid(i,j) may be a method which returns always true if the grid
+ *       is known to be fully valid topologically.
  */
 // ======================================================================
 
@@ -54,8 +58,8 @@
 #include "FlipSet.h"
 #include "Hints.h"
 #include "Missing.h"
-
 #include <boost/foreach.hpp>
+#include <string>
 
 namespace Tron
 {
@@ -90,24 +94,25 @@ class Contourer : public Interpolation<Traits>
     for (typename Grid::size_type j = 0; j < grid.height() - 1; j++)
       for (typename Grid::size_type i = 0; i < width - 1; i++)
       {
-        Contourer::rectangle(grid.x(i, j),
-                             grid.y(i, j),
-                             grid(i, j),
-                             grid.x(i, j + 1),
-                             grid.y(i, j + 1),
-                             grid(i, j + 1),
-                             grid.x(i + 1, j + 1),
-                             grid.y(i + 1, j + 1),
-                             grid(i + 1, j + 1),
-                             grid.x(i + 1, j),
-                             grid.y(i + 1, j),
-                             grid(i + 1, j),
-                             i,
-                             j,
-                             lolimit,
-                             hilimit,
-                             flipset,
-                             flipgrid);
+        if (grid.valid(i, j))
+          Contourer::rectangle(grid.x(i, j),
+                               grid.y(i, j),
+                               grid(i, j),
+                               grid.x(i, j + 1),
+                               grid.y(i, j + 1),
+                               grid(i, j + 1),
+                               grid.x(i + 1, j + 1),
+                               grid.y(i + 1, j + 1),
+                               grid(i + 1, j + 1),
+                               grid.x(i + 1, j),
+                               grid.y(i + 1, j),
+                               grid(i + 1, j),
+                               i,
+                               j,
+                               lolimit,
+                               hilimit,
+                               flipset,
+                               flipgrid);
       }
 
     flipgrid.copy(grid, flipset);
@@ -139,6 +144,34 @@ class Contourer : public Interpolation<Traits>
       for (typename Grid::size_type j = it->y1; j < it->y2; j++)
         for (typename Grid::size_type i = it->x1; i < it->x2; i++)
         {
+          if (grid.valid(i, j))
+            Contourer::rectangle(grid.x(i, j),
+                                 grid.y(i, j),
+                                 grid(i, j),
+                                 grid.x(i, j + 1),
+                                 grid.y(i, j + 1),
+                                 grid(i, j + 1),
+                                 grid.x(i + 1, j + 1),
+                                 grid.y(i + 1, j + 1),
+                                 grid(i + 1, j + 1),
+                                 grid.x(i + 1, j),
+                                 grid.y(i + 1, j),
+                                 grid(i + 1, j),
+                                 static_cast<int>(i),
+                                 static_cast<int>(j),
+                                 lolimit,
+                                 hilimit,
+                                 flipset,
+                                 flipgrid);
+        }
+    }
+
+    if (worlddata)
+    {
+      typename Grid::size_type i = grid.width() - 1;
+
+      for (typename Grid::size_type j = 0; j < grid.height() - 1; j++)
+        if (grid.valid(i, j))
           Contourer::rectangle(grid.x(i, j),
                                grid.y(i, j),
                                grid(i, j),
@@ -151,38 +184,12 @@ class Contourer : public Interpolation<Traits>
                                grid.x(i + 1, j),
                                grid.y(i + 1, j),
                                grid(i + 1, j),
-                               static_cast<int>(i),
-                               static_cast<int>(j),
+                               i,
+                               j,
                                lolimit,
                                hilimit,
                                flipset,
                                flipgrid);
-        }
-    }
-
-    if (worlddata)
-    {
-      typename Grid::size_type i = grid.width() - 1;
-
-      for (typename Grid::size_type j = 0; j < grid.height() - 1; j++)
-        Contourer::rectangle(grid.x(i, j),
-                             grid.y(i, j),
-                             grid(i, j),
-                             grid.x(i, j + 1),
-                             grid.y(i, j + 1),
-                             grid(i, j + 1),
-                             grid.x(i + 1, j + 1),
-                             grid.y(i + 1, j + 1),
-                             grid(i + 1, j + 1),
-                             grid.x(i + 1, j),
-                             grid.y(i + 1, j),
-                             grid(i + 1, j),
-                             i,
-                             j,
-                             lolimit,
-                             hilimit,
-                             flipset,
-                             flipgrid);
     }
 
     flipgrid.copy(grid, flipset);
@@ -234,24 +241,25 @@ class Contourer : public Interpolation<Traits>
         {
           for (typename Grid::size_type j = y1; j < y2; j++)
             for (typename Grid::size_type i = x1; i < x2; i++)
-              Contourer::rectangle(grid.x(i, j),
-                                   grid.y(i, j),
-                                   grid(i, j),
-                                   grid.x(i, j + 1),
-                                   grid.y(i, j + 1),
-                                   grid(i, j + 1),
-                                   grid.x(i + 1, j + 1),
-                                   grid.y(i + 1, j + 1),
-                                   grid(i + 1, j + 1),
-                                   grid.x(i + 1, j),
-                                   grid.y(i + 1, j),
-                                   grid(i + 1, j),
-                                   static_cast<int>(i),
-                                   static_cast<int>(j),
-                                   lolimit,
-                                   hilimit,
-                                   flipset,
-                                   flipgrid);
+              if (grid.valid(i, j))
+                Contourer::rectangle(grid.x(i, j),
+                                     grid.y(i, j),
+                                     grid(i, j),
+                                     grid.x(i, j + 1),
+                                     grid.y(i, j + 1),
+                                     grid(i, j + 1),
+                                     grid.x(i + 1, j + 1),
+                                     grid.y(i + 1, j + 1),
+                                     grid(i + 1, j + 1),
+                                     grid.x(i + 1, j),
+                                     grid.y(i + 1, j),
+                                     grid(i + 1, j),
+                                     static_cast<int>(i),
+                                     static_cast<int>(j),
+                                     lolimit,
+                                     hilimit,
+                                     flipset,
+                                     flipgrid);
         }
       }
     }
@@ -261,24 +269,25 @@ class Contourer : public Interpolation<Traits>
       typename Grid::size_type i = grid.width() - 1;
 
       for (typename Grid::size_type j = 0; j < grid.height() - 1; j++)
-        Contourer::rectangle(grid.x(i, j),
-                             grid.y(i, j),
-                             grid(i, j),
-                             grid.x(i, j + 1),
-                             grid.y(i, j + 1),
-                             grid(i, j + 1),
-                             grid.x(i + 1, j + 1),
-                             grid.y(i + 1, j + 1),
-                             grid(i + 1, j + 1),
-                             grid.x(i + 1, j),
-                             grid.y(i + 1, j),
-                             grid(i + 1, j),
-                             i,
-                             j,
-                             lolimit,
-                             hilimit,
-                             flipset,
-                             flipgrid);
+        if (grid.valid(i, j))
+          Contourer::rectangle(grid.x(i, j),
+                               grid.y(i, j),
+                               grid(i, j),
+                               grid.x(i, j + 1),
+                               grid.y(i, j + 1),
+                               grid(i, j + 1),
+                               grid.x(i + 1, j + 1),
+                               grid.y(i + 1, j + 1),
+                               grid(i + 1, j + 1),
+                               grid.x(i + 1, j),
+                               grid.y(i + 1, j),
+                               grid(i + 1, j),
+                               i,
+                               j,
+                               lolimit,
+                               hilimit,
+                               flipset,
+                               flipgrid);
     }
 
     flipgrid.copy(grid, flipset);
@@ -298,20 +307,21 @@ class Contourer : public Interpolation<Traits>
 
     for (typename Grid::size_type j = 0; j < grid.height() - 1; j++)
       for (typename Grid::size_type i = 0; i < width - 1; i++)
-        Contourer::rectangle(grid.x(i, j),
-                             grid.y(i, j),
-                             grid(i, j),
-                             grid.x(i, j + 1),
-                             grid.y(i, j + 1),
-                             grid(i, j + 1),
-                             grid.x(i + 1, j + 1),
-                             grid.y(i + 1, j + 1),
-                             grid(i + 1, j + 1),
-                             grid.x(i + 1, j),
-                             grid.y(i + 1, j),
-                             grid(i + 1, j),
-                             value,
-                             flipset);
+        if (grid.valid(i, j))
+          Contourer::rectangle(grid.x(i, j),
+                               grid.y(i, j),
+                               grid(i, j),
+                               grid.x(i, j + 1),
+                               grid.y(i, j + 1),
+                               grid(i, j + 1),
+                               grid.x(i + 1, j + 1),
+                               grid.y(i + 1, j + 1),
+                               grid(i + 1, j + 1),
+                               grid.x(i + 1, j),
+                               grid.y(i + 1, j),
+                               grid(i + 1, j),
+                               value,
+                               flipset);
 
     flipset.prepare();
     Builder::line<Traits>(flipset.edges(), path);
@@ -338,6 +348,28 @@ class Contourer : public Interpolation<Traits>
     {
       for (typename Grid::size_type j = it->y1; j < it->y2; j++)
         for (typename Grid::size_type i = it->x1; i < it->x2; i++)
+          if (grid.valid(i, j))
+            Contourer::rectangle(grid.x(i, j),
+                                 grid.y(i, j),
+                                 grid(i, j),
+                                 grid.x(i, j + 1),
+                                 grid.y(i, j + 1),
+                                 grid(i, j + 1),
+                                 grid.x(i + 1, j + 1),
+                                 grid.y(i + 1, j + 1),
+                                 grid(i + 1, j + 1),
+                                 grid.x(i + 1, j),
+                                 grid.y(i + 1, j),
+                                 grid(i + 1, j),
+                                 value,
+                                 flipset);
+    }
+
+    if (worlddata)
+    {
+      typename Grid::size_type i = grid.width() - 1;
+      for (typename Grid::size_type j = 0; j < grid.height() - 1; j++)
+        if (grid.valid(i, j))
           Contourer::rectangle(grid.x(i, j),
                                grid.y(i, j),
                                grid(i, j),
@@ -352,26 +384,6 @@ class Contourer : public Interpolation<Traits>
                                grid(i + 1, j),
                                value,
                                flipset);
-    }
-
-    if (worlddata)
-    {
-      typename Grid::size_type i = grid.width() - 1;
-      for (typename Grid::size_type j = 0; j < grid.height() - 1; j++)
-        Contourer::rectangle(grid.x(i, j),
-                             grid.y(i, j),
-                             grid(i, j),
-                             grid.x(i, j + 1),
-                             grid.y(i, j + 1),
-                             grid(i, j + 1),
-                             grid.x(i + 1, j + 1),
-                             grid.y(i + 1, j + 1),
-                             grid(i + 1, j + 1),
-                             grid.x(i + 1, j),
-                             grid.y(i + 1, j),
-                             grid(i + 1, j),
-                             value,
-                             flipset);
     }
 
     flipset.prepare();
@@ -419,20 +431,21 @@ class Contourer : public Interpolation<Traits>
         {
           for (typename Grid::size_type j = it->y1; j < it->y2; j++)
             for (typename Grid::size_type i = it->x1; i < it->x2; i++)
-              Contourer::rectangle(grid.x(i, j),
-                                   grid.y(i, j),
-                                   grid(i, j),
-                                   grid.x(i, j + 1),
-                                   grid.y(i, j + 1),
-                                   grid(i, j + 1),
-                                   grid.x(i + 1, j + 1),
-                                   grid.y(i + 1, j + 1),
-                                   grid(i + 1, j + 1),
-                                   grid.x(i + 1, j),
-                                   grid.y(i + 1, j),
-                                   grid(i + 1, j),
-                                   value,
-                                   flipset);
+              if (grid.valid(i, j))
+                Contourer::rectangle(grid.x(i, j),
+                                     grid.y(i, j),
+                                     grid(i, j),
+                                     grid.x(i, j + 1),
+                                     grid.y(i, j + 1),
+                                     grid(i, j + 1),
+                                     grid.x(i + 1, j + 1),
+                                     grid.y(i + 1, j + 1),
+                                     grid(i + 1, j + 1),
+                                     grid.x(i + 1, j),
+                                     grid.y(i + 1, j),
+                                     grid(i + 1, j),
+                                     value,
+                                     flipset);
         }
       }
     }
@@ -441,20 +454,21 @@ class Contourer : public Interpolation<Traits>
     {
       typename Grid::size_type i = grid.width() - 1;
       for (typename Grid::size_type j = 0; j < grid.height() - 1; j++)
-        Contourer::rectangle(grid.x(i, j),
-                             grid.y(i, j),
-                             grid(i, j),
-                             grid.x(i, j + 1),
-                             grid.y(i, j + 1),
-                             grid(i, j + 1),
-                             grid.x(i + 1, j + 1),
-                             grid.y(i + 1, j + 1),
-                             grid(i + 1, j + 1),
-                             grid.x(i + 1, j),
-                             grid.y(i + 1, j),
-                             grid(i + 1, j),
-                             value,
-                             flipset);
+        if (grid.valid(i, j))
+          Contourer::rectangle(grid.x(i, j),
+                               grid.y(i, j),
+                               grid(i, j),
+                               grid.x(i, j + 1),
+                               grid.y(i, j + 1),
+                               grid(i, j + 1),
+                               grid.x(i + 1, j + 1),
+                               grid.y(i + 1, j + 1),
+                               grid(i + 1, j + 1),
+                               grid.x(i + 1, j),
+                               grid.y(i + 1, j),
+                               grid(i + 1, j),
+                               value,
+                               flipset);
     }
 
     flipset.prepare();

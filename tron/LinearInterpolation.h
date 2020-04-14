@@ -13,7 +13,6 @@
 #include "FlipSet.h"
 #include "Missing.h"
 #include <cassert>
-#include <iostream>
 #include <vector>
 
 namespace Tron
@@ -891,48 +890,6 @@ class LinearInterpolation : public Traits
     return (z1 < z2 && z1 < z4 && z2 < z3 && z4 < z3);
   }
 
-  // A polygon is convex if all cross products of adjacent edges are of the same sign,
-  // and the sign itself says whether the polygon is clockwise or not.
-  // Ref: http://www.easywms.com/node/3602
-  // We must disallow non-convex cells such as V-shaped ones, since the intersections
-  // formulas may then produce values outside the cell.
-
-  // Note that we permit colinear adjacent edges, since for example in latlon grids
-  // the poles are represented by multiple grid points. This test thus passes the
-  // redundant case of a rectangle with no area, but the rest of the code can handle it.
-
-  static bool convex_and_clockwise(coord_type x1,
-                                   coord_type y1,
-                                   coord_type x2,
-                                   coord_type y2,
-                                   coord_type x3,
-                                   coord_type y3,
-                                   coord_type x4,
-                                   coord_type y4)
-  {
-    return ((x2 - x1) * (y3 - y2) - (y2 - y1) * (x3 - x2) <= 0 &&
-            (x3 - x2) * (y4 - y3) - (y3 - y2) * (x4 - x3) <= 0 &&
-            (x4 - x3) * (y1 - y4) - (y4 - y3) * (x1 - x4) <= 0 &&
-            (x1 - x4) * (y2 - y1) - (y1 - y4) * (x2 - x1) <= 0);
-  }
-
-  static coord_type area(coord_type x1,
-                         coord_type y1,
-                         coord_type x2,
-                         coord_type y2,
-                         coord_type x3,
-                         coord_type y3,
-                         coord_type x4,
-                         coord_type y4)
-  {
-    // clang-format off
-    return ((x2 - x1) * (y3 - y2) - (y2 - y1) * (x3 - x2) +
-            (x3 - x2) * (y4 - y3) - (y3 - y2) * (x4 - x3) +
-            (x4 - x3) * (y1 - y4) - (y4 - y3) * (x1 - x4) +
-            (x1 - x4) * (y2 - y1) - (y1 - y4) * (x2 - x1) );
-    // clang-format on
-  }
-
   static void rectangle(coord_type x1,
                         coord_type y1,
                         value_type z1,
@@ -952,16 +909,7 @@ class LinearInterpolation : public Traits
                         MyFlipSet& flipset,
                         FlipGrid& flipgrid)
   {
-    // We assume it is redundant to check the Y-coordinates too
-    if (LinearInterpolation::missing(x1) || LinearInterpolation::missing(x2) ||
-        LinearInterpolation::missing(x3) || LinearInterpolation::missing(x4))
-    {
-      return;
-    }
-
-    // Ignore suspect rectangles
-
-    if (!convex_and_clockwise(x1, y1, x2, y2, x3, y3, x4, y4)) return;
+    // We assume the cell is ok and do not validate it
 
     // If only one corner is missing, we can contour the remaining
     // triangle. If two or more are missing, we cannot do anything.
