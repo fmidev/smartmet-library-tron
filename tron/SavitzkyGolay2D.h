@@ -25,20 +25,20 @@ namespace SavitzkyGolay2D
 // ----------------------------------------------------------------------
 
 template <typename Grid>
-Grid smooth(const Grid& input, std::size_t length, std::size_t degree)
+void smooth(Grid& input, std::size_t length, std::size_t degree)
 {
-  if (length == 0 || degree == 0) return input;
+  if (length == 0 || degree == 0) return;
 
   if (length > 6) length = 6;
   if (degree > 5) degree = 5;
 
   int* factor = SavitzkyGolay2DCoefficients::coeffs[length - 1][degree - 1];
-  if (factor == 0) return input;
+  if (factor == 0) return;
 
-  // Work with a copy initialized to input in case smoothing fails due to NaN values
+  // Smoothen back to input from a copy of the original
+
   auto grid = input;
-
-  MirrorMatrix<Grid> mirror(input);
+  MirrorMatrix<Grid> mirror(grid);
 
   int n = 2 * length + 1;
 
@@ -52,10 +52,8 @@ Grid smooth(const Grid& input, std::size_t length, std::size_t degree)
       for (int j = 0; j < n; j++)
         for (int i = 0; i < n; i++)
           sum += (factor[k++] * mirror(ii + i - length, jj + j - length));
-      if (!std::isnan(sum)) grid(ii, jj) = sum / denom;
+      if (!std::isnan(sum)) input(ii, jj) = sum / denom;
     }
-
-  return grid;
 }
 }  // namespace SavitzkyGolay2D
 }  // namespace Tron
