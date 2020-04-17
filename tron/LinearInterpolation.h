@@ -699,13 +699,6 @@ class LinearInterpolation : public Traits
                         value_type value,
                         MyFlipSet& flipset)
   {
-    // We assume it is redundant to check the Y-coordinates too
-    if (LinearInterpolation::missing(x1) || LinearInterpolation::missing(x2) ||
-        LinearInterpolation::missing(x3) || LinearInterpolation::missing(x4))
-    {
-      return;
-    }
-
     if (LinearInterpolation::missing(z1))
     {
       triangle(x2, y2, z2, x3, y3, z3, x4, y4, z4, value, flipset);

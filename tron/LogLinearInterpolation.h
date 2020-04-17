@@ -710,13 +710,6 @@ class LogLinearInterpolation : public Traits
                         value_type value,
                         MyFlipSet& flipset)
   {
-    // We assume it is redundant to check the Y-coordinates too
-    if (LogLinearInterpolation::missing(x1) || LogLinearInterpolation::missing(x2) ||
-        LogLinearInterpolation::missing(x3) || LogLinearInterpolation::missing(x4))
-    {
-      return;
-    }
-
     if (LogLinearInterpolation::missing(z1))
     {
       triangle(x2, y2, z2, x3, y3, z3, x4, y4, z4, value, flipset);
