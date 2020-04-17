@@ -113,9 +113,9 @@ void length_0()
 
   Matrix grid = add_noise(smoothgrid);
 
-  auto result = Tron::SavitzkyGolay2D::smooth(grid, 0, 0);
+  Tron::SavitzkyGolay2D::smooth(grid, 0, 0);
 
-  if (difference(result, smoothgrid) < 0.0001) TEST_FAILED("Should do no smoothing at length 0");
+  if (difference(grid, smoothgrid) < 0.0001) TEST_FAILED("Should do no smoothing at length 0");
 
   TEST_PASSED();
 }
@@ -134,9 +134,9 @@ void degree_0()
 
   Matrix grid = add_noise(smoothgrid);
 
-  auto result = Tron::SavitzkyGolay2D::smooth(grid, 5, 0);
+  Tron::SavitzkyGolay2D::smooth(grid, 5, 0);
 
-  if (difference(result, smoothgrid) < 0.0001) TEST_FAILED("Should do no smoothing at length 0");
+  if (difference(grid, smoothgrid) < 0.0001) TEST_FAILED("Should do no smoothing at length 0");
 
   TEST_PASSED();
 }
@@ -152,8 +152,8 @@ void smooth_1_1()
   Matrix smoothgrid = make_matrix(20, 20);
   Matrix grid = add_noise(smoothgrid);
   double eps1 = difference(grid, smoothgrid);
-  auto result = Tron::SavitzkyGolay2D::smooth(grid, 1, 1);
-  double eps2 = difference(result, smoothgrid);
+  Tron::SavitzkyGolay2D::smooth(grid, 1, 1);
+  double eps2 = difference(grid, smoothgrid);
 
   if (eps2 > 0.9 * eps1) TEST_FAILED("Should reduce error better with size 1, degree 1");
 
@@ -171,8 +171,8 @@ void smooth_1_2()
   Matrix smoothgrid = make_matrix(20, 20);
   Matrix grid = add_noise(smoothgrid);
   double eps1 = difference(grid, smoothgrid);
-  auto result = Tron::SavitzkyGolay2D::smooth(grid, 1, 2);
-  double eps2 = difference(result, smoothgrid);
+  Tron::SavitzkyGolay2D::smooth(grid, 1, 2);
+  double eps2 = difference(grid, smoothgrid);
 
   if (eps2 > 0.95 * eps1) TEST_FAILED("Should reduce error better with size 1, degree 2");
 
@@ -190,8 +190,8 @@ void smooth_2_1()
   Matrix smoothgrid = make_matrix(20, 20);
   Matrix grid = add_noise(smoothgrid);
   double eps1 = difference(grid, smoothgrid);
-  auto result = Tron::SavitzkyGolay2D::smooth(grid, 2, 1);
-  double eps2 = difference(result, smoothgrid);
+  Tron::SavitzkyGolay2D::smooth(grid, 2, 1);
+  double eps2 = difference(grid, smoothgrid);
 
   if (eps2 > 0.8 * eps1) TEST_FAILED("Should reduce error better with size 2, degree 1");
 
@@ -209,8 +209,8 @@ void smooth_2_2()
   Matrix smoothgrid = make_matrix(20, 20);
   Matrix grid = add_noise(smoothgrid);
   double eps1 = difference(grid, smoothgrid);
-  auto result = Tron::SavitzkyGolay2D::smooth(grid, 2, 2);
-  double eps2 = difference(result, smoothgrid);
+  Tron::SavitzkyGolay2D::smooth(grid, 2, 2);
+  double eps2 = difference(grid, smoothgrid);
 
   if (eps2 > 0.85 * eps1) TEST_FAILED("Should reduce error better with size 2, degree 2");
 
@@ -228,8 +228,8 @@ void smooth_2_3()
   Matrix smoothgrid = make_matrix(20, 20);
   Matrix grid = add_noise(smoothgrid);
   double eps1 = difference(grid, smoothgrid);
-  auto result = Tron::SavitzkyGolay2D::smooth(grid, 2, 3);
-  double eps2 = difference(result, smoothgrid);
+  Tron::SavitzkyGolay2D::smooth(grid, 2, 3);
+  double eps2 = difference(grid, smoothgrid);
 
   if (eps2 > 0.85 * eps1) TEST_FAILED("Should reduce error better with size 2, degree 3");
 
@@ -247,8 +247,8 @@ void smooth_2_4()
   Matrix smoothgrid = make_matrix(20, 20);
   Matrix grid = add_noise(smoothgrid);
   double eps1 = difference(grid, smoothgrid);
-  auto result = Tron::SavitzkyGolay2D::smooth(grid, 2, 4);
-  double eps2 = difference(result, smoothgrid);
+  Tron::SavitzkyGolay2D::smooth(grid, 2, 4);
+  double eps2 = difference(grid, smoothgrid);
 
   if (eps2 > 0.95 * eps1) TEST_FAILED("Should reduce error better with size 2, degree 4");
 
@@ -266,8 +266,8 @@ void smooth_2_5()
   Matrix smoothgrid = make_matrix(20, 20);
   Matrix grid = add_noise(smoothgrid);
   double eps1 = difference(grid, smoothgrid);
-  auto result = Tron::SavitzkyGolay2D::smooth(grid, 2, 5);
-  double eps2 = difference(result, smoothgrid);
+  Tron::SavitzkyGolay2D::smooth(grid, 2, 5);
+  double eps2 = difference(grid, smoothgrid);
 
   if (eps2 > 0.95 * eps1) TEST_FAILED("Should reduce error better with size 2, degree 5");
 
@@ -285,8 +285,8 @@ void smooth_3_1()
   Matrix smoothgrid = make_matrix(20, 20);
   Matrix grid = add_noise(smoothgrid);
   double eps1 = difference(grid, smoothgrid);
-  auto result = Tron::SavitzkyGolay2D::smooth(grid, 3, 1);
-  double eps2 = difference(result, smoothgrid);
+  Tron::SavitzkyGolay2D::smooth(grid, 3, 1);
+  double eps2 = difference(grid, smoothgrid);
 
   if (eps2 > 0.8 * eps1) TEST_FAILED("Should reduce error better with size 3, degree 1");
 
@@ -304,8 +304,8 @@ void smooth_3_2()
   Matrix smoothgrid = make_matrix(20, 20);
   Matrix grid = add_noise(smoothgrid);
   double eps1 = difference(grid, smoothgrid);
-  auto result = Tron::SavitzkyGolay2D::smooth(grid, 3, 2);
-  double eps2 = difference(result, smoothgrid);
+  Tron::SavitzkyGolay2D::smooth(grid, 3, 2);
+  double eps2 = difference(grid, smoothgrid);
 
   if (eps2 > 0.85 * eps1) TEST_FAILED("Should reduce error better with size 3, degree 2");
 
@@ -323,8 +323,8 @@ void smooth_3_3()
   Matrix smoothgrid = make_matrix(20, 20);
   Matrix grid = add_noise(smoothgrid);
   double eps1 = difference(grid, smoothgrid);
-  auto result = Tron::SavitzkyGolay2D::smooth(grid, 3, 3);
-  double eps2 = difference(result, smoothgrid);
+  Tron::SavitzkyGolay2D::smooth(grid, 3, 3);
+  double eps2 = difference(grid, smoothgrid);
 
   if (eps2 > 0.85 * eps1) TEST_FAILED("Should reduce error better with size 3, degree 3");
 
@@ -342,8 +342,8 @@ void smooth_3_4()
   Matrix smoothgrid = make_matrix(20, 20);
   Matrix grid = add_noise(smoothgrid);
   double eps1 = difference(grid, smoothgrid);
-  auto result = Tron::SavitzkyGolay2D::smooth(grid, 3, 4);
-  double eps2 = difference(result, smoothgrid);
+  Tron::SavitzkyGolay2D::smooth(grid, 3, 4);
+  double eps2 = difference(grid, smoothgrid);
 
   if (eps2 > 0.85 * eps1) TEST_FAILED("Should reduce error better with size 3, degree 4");
 
@@ -361,8 +361,8 @@ void smooth_3_5()
   Matrix smoothgrid = make_matrix(20, 20);
   Matrix grid = add_noise(smoothgrid);
   double eps1 = difference(grid, smoothgrid);
-  auto result = Tron::SavitzkyGolay2D::smooth(grid, 3, 5);
-  double eps2 = difference(result, smoothgrid);
+  Tron::SavitzkyGolay2D::smooth(grid, 3, 5);
+  double eps2 = difference(grid, smoothgrid);
 
   if (eps2 > 0.85 * eps1) TEST_FAILED("Should reduce error better with size 3, degree 5");
 
@@ -380,8 +380,8 @@ void smooth_6_1()
   Matrix smoothgrid = make_matrix(20, 20);
   Matrix grid = add_noise(smoothgrid);
   double eps1 = difference(grid, smoothgrid);
-  auto result = Tron::SavitzkyGolay2D::smooth(grid, 6, 1);
-  double eps2 = difference(result, smoothgrid);
+  Tron::SavitzkyGolay2D::smooth(grid, 6, 1);
+  double eps2 = difference(grid, smoothgrid);
 
   if (eps2 > 0.85 * eps1) TEST_FAILED("Should reduce error better with size 6, degree 1");
 
@@ -399,8 +399,8 @@ void smooth_6_2()
   Matrix smoothgrid = make_matrix(20, 20);
   Matrix grid = add_noise(smoothgrid);
   double eps1 = difference(grid, smoothgrid);
-  auto result = Tron::SavitzkyGolay2D::smooth(grid, 6, 2);
-  double eps2 = difference(result, smoothgrid);
+  Tron::SavitzkyGolay2D::smooth(grid, 6, 2);
+  double eps2 = difference(grid, smoothgrid);
 
   if (eps2 > 0.8 * eps1) TEST_FAILED("Should reduce error better with size 6, degree 2");
 
@@ -418,8 +418,8 @@ void smooth_6_4()
   Matrix smoothgrid = make_matrix(20, 20);
   Matrix grid = add_noise(smoothgrid);
   double eps1 = difference(grid, smoothgrid);
-  auto result = Tron::SavitzkyGolay2D::smooth(grid, 6, 4);
-  double eps2 = difference(result, smoothgrid);
+  Tron::SavitzkyGolay2D::smooth(grid, 6, 4);
+  double eps2 = difference(grid, smoothgrid);
 
   if (eps2 > 0.85 * eps1) TEST_FAILED("Should reduce error better with size 6, degree 4");
 
