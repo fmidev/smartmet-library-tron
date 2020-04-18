@@ -9,6 +9,14 @@ INCDIR = smartmet/$(SUBNAME)
 GCC_DIAG_COLOR ?= always
 CXX_STD ?= c++11
 
+# Boost 1.69
+
+ifneq "$(wildcard /usr/include/boost169)" ""
+  INCLUDES += -I/usr/include/boost169
+  LIBS += -L/usr/lib64/boost169
+endif
+
+
 FLAGS = -std=$(CXX_STD) -fPIC -MD -fno-omit-frame-pointer -Wall -W -Wno-unused-parameter -Wno-variadic-macros
 
 FLAGS_RELEASE = -DNDEBUG -O2 -g
@@ -19,8 +27,6 @@ FLAGS_DEBUG = -O0 -g \
         -Wcast-qual \
         -Wcast-align \
         -Wwrite-strings \
-        -Wconversion \
-        -Wctor-dtor-privacy \
         -Wnon-virtual-dtor \
         -Wno-pmf-conversions \
         -Wsign-promo \
@@ -46,9 +52,9 @@ endif
 
 LDFLAGS = 
 
-INCLUDES = -I$(includedir)
+INCLUDES += -I$(includedir)
 
-LIBS = -L$(libdir)
+LIBS += -L$(libdir)
 
 # Installation directories
 

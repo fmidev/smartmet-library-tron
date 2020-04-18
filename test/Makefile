@@ -6,6 +6,14 @@ INCS = $(wildcard ../include/*.h)
 GCC_DIAG_COLOR ?= always
 CXX_STD ?= c++11
 
+# Boost 1.69
+
+ifneq "$(wildcard /usr/include/boost169)" ""
+  INCLUDES += -I/usr/include/boost169
+  LIBS += -L/usr/lib64/boost169
+endif
+
+
 MAINFLAGS = -std=$(CXX_STD) -Wall -W -Wno-unused-parameter
 
 EXTRAFLAGS = -Werror -pedantic -Wpointer-arith -Wcast-qual \
@@ -18,8 +26,8 @@ DIFFICULTFLAGS = -Weffc++ -Wunreachable-code -Wredundant-decls
 
 CC = g++
 CFLAGS = -DUNIX -MD -O0 -g $(MAINFLAGS)
-INCLUDES = -I ../tron -I /usr/include/smartmet
-LIBS = -L .. -lsmartmet-tron -lsmartmet-gis -lgeos
+INCLUDES += -I../tron -I/usr/include/smartmet
+LIBS += -L.. -lsmartmet-tron -lsmartmet-gis -lgeos
 
 all: $(PROG)
 clean:
