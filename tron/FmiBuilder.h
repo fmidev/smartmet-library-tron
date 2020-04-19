@@ -705,7 +705,12 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
 
   for (std::size_t i = 0; i < polylines.size(); i++)
     if (!polylines[i].closed())
-      throw std::runtime_error("Failed to build a valid multipolygon, linestrings still remain");
+    {
+      std::cerr << "Warning: polyline " << i << "/" << polylines.size() << " is not closed\n";
+      std::cout << "POLY " << i << "\t" << polylines[i].signedArea() << "\t"
+                << polylines[i].asText(9) << std::endl;
+      // throw std::runtime_error("Failed to build a valid multipolygon, linestrings still remain");
+    }
 
   // Find the maximum width of an edge to bound the search for the right shell for each hole.
 
@@ -720,6 +725,9 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
 
   for (std::size_t i = 0; i < polylines.size(); i++)
   {
+#if 1
+    if (!polylines[i].closed()) continue;
+#endif
     const Polyline &polyline = polylines[i];
 
     // std::cout << "POLY " << i << "\t" << polyline.signedArea() << "\t" << polyline.asText(20) <<
@@ -749,6 +757,9 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
 
   for (std::size_t i = 0; i < polylines.size(); i++)
   {
+#if 1
+    if (!polylines[i].closed()) continue;
+#endif
     const Polyline &polyline = polylines[i];
 
     if (!polyline.isClockWise())
