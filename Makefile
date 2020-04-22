@@ -20,6 +20,11 @@ ifneq "$(wildcard /usr/include/boost169)" ""
   LIBS += -L/usr/lib64/boost169
 endif
 
+ifneq "$(wildcard /usr/geos38/include)" ""
+  INCLUDES += -I/usr/geos38/include
+  LIBS += -L$(PREFIX)/geos38/lib64
+endif
+
 FLAGS_RELEASE = -DNDEBUG -O2 -g
 
 FLAGS_DEBUG = -O0 -g \
@@ -51,9 +56,9 @@ else
   override CFLAGS += $(CFLAGS_RELEASE)
 endif
 
-LDFLAGS = 
+LDFLAGS =
 
-INCLUDES += -I$(includedir) -I/usr/geos38/include
+INCLUDES += -I$(includedir)
 
 LIBS += -L$(libdir)
 
