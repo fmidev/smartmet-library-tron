@@ -129,7 +129,6 @@ class Contourer : public Interpolation<Traits>
                    const Grid& grid,
                    value_type lolimit,
                    value_type hilimit,
-                   bool worlddata,
                    const hints_type& hints)
   {
     typename hints_type::rectangles rects = hints.get_rectangles(lolimit, hilimit);
@@ -166,32 +165,6 @@ class Contourer : public Interpolation<Traits>
         }
     }
 
-    if (worlddata)
-    {
-      typename Grid::size_type i = grid.width() - 1;
-
-      for (typename Grid::size_type j = 0; j < grid.height() - 1; j++)
-        if (grid.valid(i, j))
-          Contourer::rectangle(grid.x(i, j),
-                               grid.y(i, j),
-                               grid(i, j),
-                               grid.x(i, j + 1),
-                               grid.y(i, j + 1),
-                               grid(i, j + 1),
-                               grid.x(i + 1, j + 1),
-                               grid.y(i + 1, j + 1),
-                               grid(i + 1, j + 1),
-                               grid.x(i + 1, j),
-                               grid.y(i + 1, j),
-                               grid(i + 1, j),
-                               i,
-                               j,
-                               lolimit,
-                               hilimit,
-                               flipset,
-                               flipgrid);
-    }
-
     flipgrid.copy(grid, flipset);
     flipset.prepare();
     Builder::fill<Traits>(flipset.edges(), path);
@@ -205,7 +178,6 @@ class Contourer : public Interpolation<Traits>
                    const Grid& grid,
                    value_type lolimit,
                    value_type hilimit,
-                   bool worlddata,
                    const hints_type& hints,
                    const coordinate_hints_type& coordinate_hints,
                    coord_type xmin,
@@ -264,32 +236,6 @@ class Contourer : public Interpolation<Traits>
       }
     }
 
-    if (worlddata)
-    {
-      typename Grid::size_type i = grid.width() - 1;
-
-      for (typename Grid::size_type j = 0; j < grid.height() - 1; j++)
-        if (grid.valid(i, j))
-          Contourer::rectangle(grid.x(i, j),
-                               grid.y(i, j),
-                               grid(i, j),
-                               grid.x(i, j + 1),
-                               grid.y(i, j + 1),
-                               grid(i, j + 1),
-                               grid.x(i + 1, j + 1),
-                               grid.y(i + 1, j + 1),
-                               grid(i + 1, j + 1),
-                               grid.x(i + 1, j),
-                               grid.y(i + 1, j),
-                               grid(i + 1, j),
-                               i,
-                               j,
-                               lolimit,
-                               hilimit,
-                               flipset,
-                               flipgrid);
-    }
-
     flipgrid.copy(grid, flipset);
     flipset.prepare();
     Builder::fill<Traits>(flipset.edges(), path);
@@ -332,11 +278,7 @@ class Contourer : public Interpolation<Traits>
    * data values to contour only areas of interest.
    */
 
-  static void line(PathAdapter& path,
-                   const Grid& grid,
-                   value_type value,
-                   bool worlddata,
-                   const hints_type& hints)
+  static void line(PathAdapter& path, const Grid& grid, value_type value, const hints_type& hints)
   {
     typename hints_type::rectangles rects = hints.get_rectangles(value);
 
@@ -365,27 +307,6 @@ class Contourer : public Interpolation<Traits>
                                  flipset);
     }
 
-    if (worlddata)
-    {
-      typename Grid::size_type i = grid.width() - 1;
-      for (typename Grid::size_type j = 0; j < grid.height() - 1; j++)
-        if (grid.valid(i, j))
-          Contourer::rectangle(grid.x(i, j),
-                               grid.y(i, j),
-                               grid(i, j),
-                               grid.x(i, j + 1),
-                               grid.y(i, j + 1),
-                               grid(i, j + 1),
-                               grid.x(i + 1, j + 1),
-                               grid.y(i + 1, j + 1),
-                               grid(i + 1, j + 1),
-                               grid.x(i + 1, j),
-                               grid.y(i + 1, j),
-                               grid(i + 1, j),
-                               value,
-                               flipset);
-    }
-
     flipset.prepare();
     Builder::line<Traits>(flipset.edges(), path);
   }
@@ -397,7 +318,6 @@ class Contourer : public Interpolation<Traits>
   static void line(PathAdapter& path,
                    const Grid& grid,
                    value_type value,
-                   bool worlddata,
                    const hints_type& hints,
                    const coordinate_hints_type& coordinate_hints,
                    coord_type xmin,
@@ -448,27 +368,6 @@ class Contourer : public Interpolation<Traits>
                                      flipset);
         }
       }
-    }
-
-    if (worlddata)
-    {
-      typename Grid::size_type i = grid.width() - 1;
-      for (typename Grid::size_type j = 0; j < grid.height() - 1; j++)
-        if (grid.valid(i, j))
-          Contourer::rectangle(grid.x(i, j),
-                               grid.y(i, j),
-                               grid(i, j),
-                               grid.x(i, j + 1),
-                               grid.y(i, j + 1),
-                               grid(i, j + 1),
-                               grid.x(i + 1, j + 1),
-                               grid.y(i + 1, j + 1),
-                               grid(i + 1, j + 1),
-                               grid.x(i + 1, j),
-                               grid.y(i + 1, j),
-                               grid(i + 1, j),
-                               value,
-                               flipset);
     }
 
     flipset.prepare();

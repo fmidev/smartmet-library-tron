@@ -4,7 +4,7 @@
 %define debug_package %{nil}
 Summary: tron library
 Name: %{SPECNAME}
-Version: 20.4.18
+Version: 20.4.23
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -48,6 +48,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/lib%{LIBNAME}.a
 
 %changelog
+* Thu Apr 23 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.23-1.fmi
+- Removed explicit worlddata support, the case can be handled within the input object
+
 * Sat Apr 18 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.18-1.fmi
 - Upgrade to Boost 1.69
 
