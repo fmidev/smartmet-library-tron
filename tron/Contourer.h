@@ -83,16 +83,13 @@ class Contourer : public Interpolation<Traits>
    * Calculate polygon surrounding the given value range.
    */
 
-  static void fill(
-      PathAdapter& path, const Grid& grid, value_type lolimit, value_type hilimit, bool worlddata)
+  static void fill(PathAdapter& path, const Grid& grid, value_type lolimit, value_type hilimit)
   {
     MyFlipSet flipset;
-    FlipGrid flipgrid(grid.width(), grid.height(), worlddata);
-
-    typename Grid::size_type width = (worlddata ? grid.width() + 1 : grid.width());
+    FlipGrid flipgrid(grid.width(), grid.height());
 
     for (typename Grid::size_type j = 0; j < grid.height() - 1; j++)
-      for (typename Grid::size_type i = 0; i < width - 1; i++)
+      for (typename Grid::size_type i = 0; i < grid.width() - 1; i++)
       {
         if (grid.valid(i, j))
           Contourer::rectangle(grid.x(i, j),
@@ -134,7 +131,7 @@ class Contourer : public Interpolation<Traits>
     typename hints_type::rectangles rects = hints.get_rectangles(lolimit, hilimit);
 
     MyFlipSet flipset;
-    FlipGrid flipgrid(grid.width(), grid.height(), worlddata);
+    FlipGrid flipgrid(grid.width(), grid.height());
 
     for (typename hints_type::rectangles::const_iterator it = rects.begin(), end = rects.end();
          it != end;
@@ -190,7 +187,7 @@ class Contourer : public Interpolation<Traits>
         coordinate_hints.get_rectangles(xmin, ymin, xmax, ymax);
 
     MyFlipSet flipset;
-    FlipGrid flipgrid(grid.width(), grid.height(), worlddata);
+    FlipGrid flipgrid(grid.width(), grid.height());
 
     // Process only overlapping value/coordinate rectangles
 
@@ -245,14 +242,12 @@ class Contourer : public Interpolation<Traits>
    * Calculate isoline for the given value
    */
 
-  static void line(PathAdapter& path, const Grid& grid, value_type value, bool worlddata)
+  static void line(PathAdapter& path, const Grid& grid, value_type value)
   {
     MyFlipSet flipset;
 
-    typename Grid::size_type width = (worlddata ? grid.width() + 1 : grid.width());
-
     for (typename Grid::size_type j = 0; j < grid.height() - 1; j++)
-      for (typename Grid::size_type i = 0; i < width - 1; i++)
+      for (typename Grid::size_type i = 0; i < grid.width() - 1; i++)
         if (grid.valid(i, j))
           Contourer::rectangle(grid.x(i, j),
                                grid.y(i, j),
