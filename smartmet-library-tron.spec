@@ -11,14 +11,19 @@ Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-tron
 Source0: %{name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot-%(%{__id_u} -n)
+
+%if %{defined el7}
+Requires: geos >= 3.5.0
+BuildRequires: geos-devel >= 3.5.0
+%else if %{defined el8}
+Requires: geos38
+BuildRequires: geos38-devel
+%endif
+
 BuildRequires: rpm-build
 BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: boost169-devel
-BuildRequires: geos-devel >= 3.5.0
-Requires: geos >= 3.5.0
-# Actually, this should only be required by the devel package
-Requires: geos-devel >= 3.5.0
 Provides: %{LIBNAME}
 Obsoletes: libsmartmet-tron < 17.1.4
 Obsoletes: libsmartmet-tron-debuginfo < 17.1.4
