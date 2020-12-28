@@ -16,12 +16,14 @@ BuildRequires: gcc-c++
 BuildRequires: geos38-devel
 BuildRequires: make
 BuildRequires: rpm-build
+BuildRequires: smartmet-library-macgyver-devel >= 20.12.15
 Requires: geos38
 Provides: %{LIBNAME}
 Obsoletes: libsmartmet-tron < 17.1.4
 Obsoletes: libsmartmet-tron-debuginfo < 17.1.4
 #TestRequires: boost169-devel
 #TestRequires: gcc-c++
+#TestRequires: smartmet-library-macgyver-devel
 #TestRequires: smartmet-library-gis-devel
 #TestRequires: smartmet-library-regression
 
