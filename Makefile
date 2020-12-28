@@ -5,90 +5,26 @@ INCDIR = smartmet/$(SUBNAME)
 
 # Note: Must not use -Ofast or similar which disable infinity handling
 
--include $(HOME)/.smartmet.mk
-GCC_DIAG_COLOR ?= always
-CXX_STD ?= c++11
+REQUIRES = geos
 
-# Boost 1.69
+include $(shell echo $${PREFIX-/usr})/share/smartmet/devel/makefile.inc
 
-ifneq "$(wildcard /usr/include/boost169)" ""
-  INCLUDES += -I/usr/include/boost169
-  LIBS += -L/usr/lib64/boost169
-endif
-
-
-FLAGS = -std=$(CXX_STD) -fPIC -MD -fno-omit-frame-pointer -Wall -W -Wno-unused-parameter -Wno-variadic-macros
-
-FLAGS_RELEASE = -DNDEBUG -O2 -g
-
-FLAGS_DEBUG = -O0 -g \
-        -Werror \
-        -Wpointer-arith \
-        -Wcast-qual \
-        -Wcast-align \
-        -Wwrite-strings \
-        -Wnon-virtual-dtor \
-        -Wno-pmf-conversions \
-        -Wsign-promo \
-        -Wchar-subscripts \
-        -Wredundant-decls \
-        -Woverloaded-virtual
-
-CC = g++
 ARFLAGS = -r
 
-# Default compiler flags
+# Compiler options
 
-DEFINES = -DUNIX
+DEFINES = -DUNIX -D_REENTRANT -DUSE_UNSTABLE_GEOS_CPP_API
 
-CFLAGS_RELEASE = $(DEFINES) $(FLAGS) $(FLAGS_RELEASE)
-CFLAGS_DEBUG   = $(DEFINES) $(FLAGS) $(FLAGS_DEBUG)
+LIBS += $(REQUIRED_LIBS)
 
-ifneq (,$(findstring debug,$(MAKECMDGOALS)))
-  override CFLAGS += $(CFLAGS_DEBUG)
-else
-  override CFLAGS += $(CFLAGS_RELEASE)
-endif
+# What to install
 
-LDFLAGS = 
-
-INCLUDES += -I$(includedir)
-
-LIBS += -L$(libdir)
-
-# Installation directories
-
-processor := $(shell uname -p)
-
-ifeq ($(origin PREFIX), undefined)
-  PREFIX = /usr
-else
-  PREFIX = $(PREFIX)
-endif
-
-ifeq ($(processor), x86_64)
-  libdir = $(PREFIX)/lib64
-else
-  libdir = $(PREFIX)/lib
-endif
-
-bindir = $(PREFIX)/bin
-includedir = $(PREFIX)/include
-datadir = $(PREFIX)/share
-objdir = obj
+LIBFILE = libsmartmet-$(SUBNAME).a
 
 # Compilation directories
 
 vpath %.cpp $(SUBNAME)
 vpath %.h $(SUBNAME)
-vpath %.o obj
-
-# How to install
-
-LIBFILE = lib$(LIB).a
-
-INSTALL_PROG = install -m 775
-INSTALL_DATA = install -m 664
 
 # The files to be compiled
 
@@ -98,23 +34,22 @@ OBJS = $(patsubst %.cpp, obj/%.o, $(notdir $(SRCS)))
 
 INCLUDES := -Iinclude $(INCLUDES)
 
-# For make depend:
-
 .PHONY: test rpm
 
 # The rules
 
 all: objdir $(LIBFILE)
-debug: objdir $(LIBFILE)
-release: objdir $(LIBFILE)
+debug: all
+release: all
+profile: all
 
 $(LIBFILE): $(OBJS)
 	$(AR) $(ARFLAGS) $(LIBFILE) $(OBJS)
 
 clean:
-	rm -f $(LIBFILE) $(SUBNAME)/*~
-	rm -rf obj
-	+cd test && make clean
+	rm -f $(LIBFILE) *~ $(SUBNAME)/*~
+	rm -rf $(objdir)
+	$(MAKE) -C test $@
 
 format:
 	clang-format -i -style=file $(SUBNAME)/*.h $(SUBNAME)/*.cpp test/*.cpp
@@ -134,7 +69,7 @@ test:
 	+cd test && make test
 
 objdir:
-	@mkdir -p obj
+	@mkdir -p $(objdir)
 
 rpm: clean $(SPEC).spec
 	rm -f $(SPEC).tar.gz # Clean a possible leftover from previous attempt
@@ -144,7 +79,9 @@ rpm: clean $(SPEC).spec
 
 .SUFFIXES: $(SUFFIXES) .cpp
 
-obj/%.o : %.cpp
-	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
+obj/%.o: %.cpp
+	$(CXX) $(CFLAGS) $(INCLUDES) -c -o $@ $<
 
+ifneq ($(wildcard obj/*.d),)
 -include $(wildcard obj/*.d)
+endif

@@ -35,23 +35,19 @@ std::size_t hash_value(const point &p)
  */
 // ----------------------------------------------------------------------
 
-FmiBuilder::FmiBuilder(boost::shared_ptr<geos::geom::GeometryFactory> theFactory)
+FmiBuilder::FmiBuilder(const geos::geom::GeometryFactory &theFactory)
     : itsResult(), itsFactory(theFactory)
 {
 }
 
 // ----------------------------------------------------------------------
 /*!
- * \brief Clean up in case the result() method is never called
- */
-// ----------------------------------------------------------------------
-
-FmiBuilder::~FmiBuilder() {}
-// ----------------------------------------------------------------------
-/*!
  * \brief Return the final result
  */
 // ----------------------------------------------------------------------
 
-boost::shared_ptr<geos::geom::Geometry> FmiBuilder::result() { return itsResult; }
+std::unique_ptr<geos::geom::Geometry> FmiBuilder::result()
+{
+  return std::move(itsResult);
+}
 }  // namespace Tron
