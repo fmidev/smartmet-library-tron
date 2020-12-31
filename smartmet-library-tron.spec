@@ -4,7 +4,7 @@
 %define debug_package %{nil}
 Summary: tron library
 Name: %{SPECNAME}
-Version: 20.12.28
+Version: 20.12.31
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -13,6 +13,7 @@ Source0: %{name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot-%(%{__id_u} -n)
 BuildRequires: boost169-devel
 BuildRequires: gcc-c++
+BuildRequires: devtoolset-7-gcc-c++
 BuildRequires: geos38-devel
 BuildRequires: make
 BuildRequires: rpm-build
@@ -50,6 +51,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/lib%{LIBNAME}.a
 
 %changelog
+* Thu Dec 31 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.12.31-1.fmi
+- Require devtoolset-7-gcc-c++ to be able to use clang++ -std=c++17
+
 * Mon Dec 28 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.12.28-1.fmi
 - Upgrade to GEOS 3.8
 
