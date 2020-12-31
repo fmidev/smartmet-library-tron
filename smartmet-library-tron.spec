@@ -16,6 +16,7 @@ BuildRequires: gcc-c++
 %if %{defined el7}
 Requires: proj-epsg
 BuildRequires: devtoolset-7-gcc-c++
+#TestRequires: devtoolset-7-gcc-c++
 %endif
 BuildRequires: geos38-devel
 BuildRequires: make
