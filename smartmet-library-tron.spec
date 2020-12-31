@@ -13,7 +13,10 @@ Source0: %{name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot-%(%{__id_u} -n)
 BuildRequires: boost169-devel
 BuildRequires: gcc-c++
+%if %{defined el7}
+Requires: proj-epsg
 BuildRequires: devtoolset-7-gcc-c++
+%endif
 BuildRequires: geos38-devel
 BuildRequires: make
 BuildRequires: rpm-build
