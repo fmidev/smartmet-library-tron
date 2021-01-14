@@ -4,7 +4,7 @@
 %define debug_package %{nil}
 Summary: tron library
 Name: %{SPECNAME}
-Version: 21.1.12
+Version: 21.1.14
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -20,7 +20,7 @@ BuildRequires: devtoolset-7-gcc-c++
 BuildRequires: geos39-devel
 BuildRequires: make
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-macgyver-devel >= 21.1.4
+BuildRequires: smartmet-library-macgyver-devel >= 21.1.14
 Requires: geos39
 Provides: %{LIBNAME}
 Obsoletes: libsmartmet-tron < 17.1.4
@@ -54,6 +54,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/lib%{LIBNAME}.a
 
 %changelog
+* Thu Jan 14 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.1.14-1.fmi
+- Repackaged smartmet to resolve debuginfo issues
+
 * Tue Jan 12 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.1.12-1.fmi
 - Removed obsolete proj-epsg dependency
 
