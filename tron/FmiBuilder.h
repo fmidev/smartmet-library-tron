@@ -100,7 +100,8 @@ typedef std::vector<std::size_t> EdgeFromRing;
 
 inline void validate(const std::unique_ptr<geos::geom::Geometry> &geom)
 {
-  if (!geom) return;
+  if (!geom)
+    return;
 #if 0
   geos::operation::valid::IsValidOp validator(geom.get());
   // http://postgis.net/docs/using_postgis_dbmanagement.html#OGC_Validity
@@ -156,7 +157,8 @@ long pick_free_edge(const Edges &edges, const Targets &targets, long index)
   std::size_t i = boost::numeric_cast<std::size_t>(index);
   for (; i < ntargets; ++i)
   {
-    if (targets[i] < 0) return i;
+    if (targets[i] < 0)
+      return i;
   }
   return -1;
 }
@@ -180,8 +182,10 @@ long find_first_match(
   // again
 
   pos += pos - lastpos;
-  if (pos < 0) pos = 0;
-  if (pos >= nedges) pos = nedges - 1;
+  if (pos < 0)
+    pos = 0;
+  if (pos >= nedges)
+    pos = nedges - 1;
 
   // Note: The last coordinate can never be the same as the start coordinate at the hint,
   // that would mean there was a 0-length edge.
@@ -194,7 +198,8 @@ long find_first_match(
     {
       if (pos < 0 || edges[pos] < endcoordinate)
       {
-        if (edges[++pos] == endcoordinate) return pos;
+        if (edges[++pos] == endcoordinate)
+          return pos;
         return -1;
       }
     }
@@ -240,7 +245,8 @@ long pick_best_match(const Polylines &polylines,
   *isoline_extension = false;
 
   // Return no choice if there is nothing to choose from
-  if (pos < 0) return pos;
+  if (pos < 0)
+    return pos;
 
   // Last coordinate of the polyline
   const typename Polyline::value_type &endcoordinate = polyline.back();
@@ -257,7 +263,8 @@ long pick_best_match(const Polylines &polylines,
   {
     // No best pick if the edge is already taken. Could happen with polylines, not with polygons.
 
-    if (targets[pos] < 0) return pos;
+    if (targets[pos] < 0)
+      return pos;
 
     if (targets[pos] == polylineindex)
       *self_touch = true;
@@ -284,7 +291,8 @@ long pick_best_match(const Polylines &polylines,
 
   for (long i = pos; i < nedges; i++)
   {
-    if (!(edges[i] == endcoordinate)) break;
+    if (!(edges[i] == endcoordinate))
+      break;
     if (targets[i] < 0)
       available.push_back(i);
     else if (targets[i] == polylineindex)
@@ -295,7 +303,8 @@ long pick_best_match(const Polylines &polylines,
   }
 
   // Nothing available?
-  if (available.empty()) return -1;
+  if (available.empty())
+    return -1;
 
   // No need to calculate angles if there is only one choice remaining
 
@@ -363,7 +372,8 @@ std::size_t representative_edge(const Edges &edges, const EdgeIndexes &edgeindex
   for (std::size_t i = edgeindexes.size() - 1; i > 0; i--)
   {
     std::size_t idx = edgeindexes[i];
-    if (edges[idx].x1() != edges[idx].x2()) return idx;
+    if (edges[idx].x1() != edges[idx].x2())
+      return idx;
   }
 
   // Should never happen for polygons, just return zero to keep the compiler happy
@@ -479,7 +489,8 @@ boost::optional<std::size_t> find_shell(const Targets &targets,
        ++iter)
   {
     std::size_t polyline = iter->second;
-    if (counts[polyline] % 2 != 0) return polyline;
+    if (counts[polyline] % 2 != 0)
+      return polyline;
   }
 
   return {};
@@ -524,7 +535,8 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
   {
     // Find next free edge. Done if everything has been processed.
     edgeindex = pick_free_edge(edges, targets, ++edgeindex);
-    if (edgeindex < 0) break;
+    if (edgeindex < 0)
+      break;
 
     // Start a new polyline from the chosen edge
     const typename Edges::value_type &edge = edges[edgeindex];
@@ -668,7 +680,6 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
     for (std::size_t i = 0; i < polylines.size(); i++)
     {
       const Polyline &polyline = polylines[i];
-
       std::vector<gg::Coordinate> points;
       points.reserve(points.size());
       for (typename Ring<Traits>::const_iterator it = polyline.begin(); it != polyline.end(); ++it)
@@ -726,7 +737,8 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
   for (std::size_t i = 0; i < polylines.size(); i++)
   {
 #if 1
-    if (!polylines[i].closed()) continue;
+    if (!polylines[i].closed())
+      continue;
 #endif
     const Polyline &polyline = polylines[i];
 
@@ -758,7 +770,8 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
   for (std::size_t i = 0; i < polylines.size(); i++)
   {
 #if 1
-    if (!polylines[i].closed()) continue;
+    if (!polylines[i].closed())
+      continue;
 #endif
     const Polyline &polyline = polylines[i];
 
@@ -815,7 +828,8 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
 
       for (std::size_t j = 0; j < holeindexes.size(); j++)
       {
-        if (!holetransfer) holetransfer = new std::vector<gg::LinearRing *>;
+        if (!holetransfer)
+          holetransfer = new std::vector<gg::LinearRing *>;
         // std::cout << "Shell " << i << " has hole " << holeindexes[j] << std::endl;
         holetransfer->push_back(holes[holeindexes[j]]);
       }

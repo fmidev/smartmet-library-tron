@@ -4,24 +4,30 @@
 %define debug_package %{nil}
 Summary: tron library
 Name: %{SPECNAME}
-Version: 20.4.23
+Version: 21.1.14
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-tron
 Source0: %{name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot-%(%{__id_u} -n)
-BuildRequires: rpm-build
-BuildRequires: gcc-c++
-BuildRequires: make
 BuildRequires: boost169-devel
-BuildRequires: geos38-devel
-Requires: geos38
+BuildRequires: gcc-c++
+%if %{defined el7}
+BuildRequires: devtoolset-7-gcc-c++
+#TestRequires: devtoolset-7-gcc-c++
+%endif
+BuildRequires: geos39-devel
+BuildRequires: make
+BuildRequires: rpm-build
+BuildRequires: smartmet-library-macgyver-devel >= 21.1.14
+Requires: geos39
 Provides: %{LIBNAME}
 Obsoletes: libsmartmet-tron < 17.1.4
 Obsoletes: libsmartmet-tron-debuginfo < 17.1.4
-#TestRequires: boost-devel
+#TestRequires: boost169-devel
 #TestRequires: gcc-c++
+#TestRequires: smartmet-library-macgyver-devel
 #TestRequires: smartmet-library-gis-devel
 #TestRequires: smartmet-library-regression
 
@@ -48,8 +54,20 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/lib%{LIBNAME}.a
 
 %changelog
-* Thu Apr 23 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.23-1.fmi
-- Removed explicit worlddata support, the case can be handled within the input object
+* Thu Jan 14 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.1.14-1.fmi
+- Repackaged smartmet to resolve debuginfo issues
+
+* Tue Jan 12 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.1.12-1.fmi
+- Removed obsolete proj-epsg dependency
+
+* Tue Jan  5 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.1.5-1.fmi
+- Upgrade to geos39
+
+* Thu Dec 31 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.12.31-1.fmi
+- Require devtoolset-7-gcc-c++ to be able to use clang++ -std=c++17
+
+* Mon Dec 28 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.12.28-1.fmi
+- Upgrade to GEOS 3.8
 
 * Sat Apr 18 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.18-1.fmi
 - Upgrade to Boost 1.69

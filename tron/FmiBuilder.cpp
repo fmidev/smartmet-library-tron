@@ -46,5 +46,9 @@ FmiBuilder::FmiBuilder(const geos::geom::GeometryFactory &theFactory)
  */
 // ----------------------------------------------------------------------
 
-std::unique_ptr<geos::geom::Geometry> FmiBuilder::result() { return std::move(itsResult); }
+std::unique_ptr<geos::geom::Geometry> FmiBuilder::result()
+{
+  return std::move(itsResult);
+}
+
 }  // namespace Tron
