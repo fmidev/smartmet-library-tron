@@ -50,4 +50,5 @@ std::unique_ptr<geos::geom::Geometry> FmiBuilder::result()
 {
   return std::move(itsResult);
 }
+
 }  // namespace Tron

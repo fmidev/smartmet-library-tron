@@ -32,15 +32,15 @@ void smooth(Grid& input, std::size_t length, std::size_t degree)
   if (length > 6) length = 6;
   if (degree > 5) degree = 5;
 
-  // Work with a copy
-
-  Grid grid = input;
-  MirrorMatrix<Grid> mirror(input);
-
-  int n = 2 * length + 1;
-
   int* factor = SavitzkyGolay2DCoefficients::coeffs[length - 1][degree - 1];
   if (factor == 0) return;
+
+  // Smoothen back to input from a copy of the original
+
+  auto grid = input;
+  MirrorMatrix<Grid> mirror(grid);
+
+  int n = 2 * length + 1;
 
   int denom = SavitzkyGolay2DCoefficients::denoms[length - 1][degree - 1];
 
@@ -52,10 +52,8 @@ void smooth(Grid& input, std::size_t length, std::size_t degree)
       for (int j = 0; j < n; j++)
         for (int i = 0; i < n; i++)
           sum += (factor[k++] * mirror(ii + i - length, jj + j - length));
-      if (!std::isnan(sum)) grid(ii, jj) = sum / denom;
+      if (!std::isnan(sum)) input(ii, jj) = sum / denom;
     }
-
-  input.swap(grid);
 }
 }  // namespace SavitzkyGolay2D
 }  // namespace Tron

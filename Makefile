@@ -3,6 +3,9 @@ LIB = smartmet-$(SUBNAME)
 SPEC = smartmet-library-$(SUBNAME)
 INCDIR = smartmet/$(SUBNAME)
 
+-include $(HOME)/.smartmet.mk
+GCC_DIAG_COLOR ?= always
+
 # Note: Must not use -Ofast or similar which disable infinity handling
 
 REQUIRES = geos

@@ -18,11 +18,6 @@
  * be inefficient since in typical contouring most cell
  * edges will be flipped twice or not at all, a single
  * flip is the exception.
- *
- * The worlddata boolean indicates that the data wraps around
- * in the x-direction and that special care should be taken
- * to handle the extra cell created by the rightmost and
- * leftmost edges.
  */
 // ======================================================================
 
@@ -37,7 +32,7 @@ class FlipGrid
  public:
   typedef std::vector<std::size_t> value_type;
 
-  FlipGrid(std::size_t width, std::size_t height, bool worlddata = false);
+  FlipGrid(std::size_t width, std::size_t height);
 
   void flipTop(std::size_t i, std::size_t j);
   void flipRight(std::size_t i, std::size_t j);
@@ -66,7 +61,6 @@ class FlipGrid
   std::size_t itsWidth;
   std::size_t itsHeight;
   std::size_t itsSize;
-  bool itsWorldData;
 
   // Flipping a None sets the enum value, otherwise the value is set to None
   enum Side

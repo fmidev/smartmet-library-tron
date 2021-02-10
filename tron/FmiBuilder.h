@@ -45,7 +45,6 @@ l* Building utility for FMI.
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
 #include <geos/algorithm/CGAlgorithmsDD.h>
 #include <geos/geom/CoordinateArraySequence.h>
@@ -71,6 +70,7 @@ class FmiBuilder : private boost::noncopyable
   FmiBuilder &operator=(const FmiBuilder &other) = delete;
 
   FmiBuilder(const geos::geom::GeometryFactory &theFactory);
+
   std::unique_ptr<geos::geom::Geometry> result();
 
   template <typename Traits, typename Edges>
@@ -716,7 +716,12 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
 
   for (std::size_t i = 0; i < polylines.size(); i++)
     if (!polylines[i].closed())
-      throw std::runtime_error("Failed to build a valid multipolygon, linestrings still remain");
+    {
+      std::cerr << "Warning: polyline " << i << "/" << polylines.size() << " is not closed\n";
+      std::cout << "POLY " << i << "\t" << polylines[i].signedArea() << "\t"
+                << polylines[i].asText(9) << std::endl;
+      // throw std::runtime_error("Failed to build a valid multipolygon, linestrings still remain");
+    }
 
   // Find the maximum width of an edge to bound the search for the right shell for each hole.
 
@@ -731,6 +736,10 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
 
   for (std::size_t i = 0; i < polylines.size(); i++)
   {
+#if 1
+    if (!polylines[i].closed())
+      continue;
+#endif
     const Polyline &polyline = polylines[i];
 
     // std::cout << "POLY " << i << "\t" << polyline.signedArea() << "\t" << polyline.asText(20) <<
@@ -760,6 +769,10 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
 
   for (std::size_t i = 0; i < polylines.size(); i++)
   {
+#if 1
+    if (!polylines[i].closed())
+      continue;
+#endif
     const Polyline &polyline = polylines[i];
 
     if (!polyline.isClockWise())

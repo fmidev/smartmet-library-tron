@@ -139,13 +139,6 @@ class DiscreteInterpolation : public Traits
                         MyFlipSet& flipset,
                         FlipGrid& flipgrid)
   {
-    // We assume it is redundant to check the Y-coordinates too
-    if (DiscreteInterpolation::missing(x1) || DiscreteInterpolation::missing(x2) ||
-        DiscreteInterpolation::missing(x3) || DiscreteInterpolation::missing(x4))
-    {
-      return;
-    }
-
     // If only one corner is missing, we can contour the remaining
     // triangle. If two or more are missing, we cannot do anything.
 

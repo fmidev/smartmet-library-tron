@@ -131,13 +131,6 @@ class NearestNeighbourInterpolation : public Traits
                         MyFlipSet& flipset,
                         FlipGrid& flipgrid)
   {
-    // We assume it is redundant to check the Y-coordinates too
-    if (NearestNeighbourInterpolation::missing(x1) || NearestNeighbourInterpolation::missing(x2) ||
-        NearestNeighbourInterpolation::missing(x3) || NearestNeighbourInterpolation::missing(x4))
-    {
-      return;
-    }
-
     // If only one corner is missing, we can contour the remaining
     // triangle. If two or more are missing, we cannot do anything.
 
