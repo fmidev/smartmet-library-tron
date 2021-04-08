@@ -106,14 +106,17 @@ class LogLinearInterpolation : public Traits
 
   static place_type placement(value_type value, value_type lo, value_type hi)
   {
-    if (!LogLinearInterpolation::missing(lo) && value < lo) return Below;
-    if (!LogLinearInterpolation::missing(hi) && value >= hi) return Above;
+    if (!LogLinearInterpolation::missing(lo) && value < lo)
+      return Below;
+    if (!LogLinearInterpolation::missing(hi) && value >= hi)
+      return Above;
     return Inside;
   }
 
   static place_type placement(value_type value, value_type limit)
   {
-    if (!LogLinearInterpolation::missing(limit) && value <= limit) return Below;
+    if (!LogLinearInterpolation::missing(limit) && value <= limit)
+      return Below;
     return Above;
   }
 
@@ -255,7 +258,8 @@ class LogLinearInterpolation : public Traits
   {
     // Here we require exactly one Below value, hence we require xor to be true
 
-    if (!((c1 == Below) ^ (c2 == Below))) return;
+    if (!((c1 == Below) ^ (c2 == Below)))
+      return;
 
     // Note that we do not need to worry about an Inside-Inside
     // edge here - the case is handled by joining the end points
@@ -644,7 +648,8 @@ class LogLinearInterpolation : public Traits
 
     // There are no intersections to be calculated if everything
     // is in the same region
-    if (c1 == c2 && c2 == c3) return;
+    if (c1 == c2 && c2 == c3)
+      return;
 
     // Handling Inside values is easiest, if we simply require
     // that the triangle contains atleast one Below value.
@@ -655,7 +660,8 @@ class LogLinearInterpolation : public Traits
     // or an infinum type definition. We require Below for
     // backward compatibility with the old Imagine library.
 
-    if (c1 != Below && c2 != Below && c3 != Below) return;
+    if (c1 != Below && c2 != Below && c3 != Below)
+      return;
 
     // After this, the only case which does not produce
     // a line segment is an Above+Above+Inside combination.
@@ -735,7 +741,8 @@ class LogLinearInterpolation : public Traits
 
       // Quick code if c1=c2=c3=c4
 
-      if (c1 == c2 && c2 == c3 && c3 == c4) return;
+      if (c1 == c2 && c2 == c3 && c3 == c4)
+        return;
 
       std::vector<coord_type> x, y;
       if (c1 == Below)
@@ -885,13 +892,30 @@ class LogLinearInterpolation : public Traits
           }
         }
       }
-      if (!x.empty()) flush_line(x, y, flipset);
+      if (!x.empty())
+        flush_line(x, y, flipset);
     }
   }
 
+  // A grid cell looks like a saddle point for some value z if that value would intersect
+  // all the edges. Hence if the intersection of all the intervals represented by the
+  // edges is not empty, there is a potential saddle point.
+
   static bool is_saddle(value_type z1, value_type z2, value_type z3, value_type z4)
   {
-    return (z1 < z2 && z1 < z4 && z2 < z3 && z4 < z3);
+    auto lo = std::min(z1, z2);
+    auto hi = std::max(z1, z2);
+    lo = std::max(lo, std::min(z2, z3));
+    hi = std::min(hi, std::max(z2, z3));
+    if (lo >= hi)
+      return false;
+    lo = std::max(lo, std::min(z3, z4));
+    hi = std::min(hi, std::max(z3, z4));
+    if (lo >= hi)
+      return false;
+    lo = std::max(lo, std::min(z4, z1));
+    hi = std::min(hi, std::max(z4, z1));
+    return (hi > lo);
   }
 
   static void rectangle(coord_type x1,
@@ -962,8 +986,7 @@ class LogLinearInterpolation : public Traits
       // without using the contour limits so that the same decision
       // will be made for all contours.
 
-      bool saddlepoint = is_saddle(z1, z2, z3, z4) || is_saddle(z2, z3, z4, z1) ||
-                         is_saddle(z3, z4, z1, z2) || is_saddle(z4, z1, z2, z3);
+      bool saddlepoint = is_saddle(z1, z2, z3, z4);
 
       if (!saddlepoint)
       {

@@ -4,7 +4,7 @@
 %define debug_package %{nil}
 Summary: tron library
 Name: %{SPECNAME}
-Version: 21.2.10
+Version: 21.4.8
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -54,6 +54,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/lib%{LIBNAME}.a
 
 %changelog
+* Thu Apr  8 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.4.8-1.fmi
+- Fixed saddle point detection
+- Reserve vector sizes in advance for a great speed improvement
+
 * Wed Feb 10 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.2.10-1.fmi
 - Merged contouring fixes and improvements made in WGS84 branch
 
