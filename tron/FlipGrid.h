@@ -61,7 +61,6 @@ class FlipGrid
     Bottom
   };
 
-  // We save size here since standard does not speficy the size of enums (32-bit?)
   using storage_type = std::vector<Side>;
 
   storage_type itsVerticalEdges;
