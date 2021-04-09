@@ -83,18 +83,20 @@ class CoordinateHints : public Traits
   }
 
  private:
-  CoordinateHints();
+  CoordinateHints() = delete;
+  CoordinateHints(const CoordinateHints& other) = delete;
+  CoordinateHints& operator=(const CoordinateHints& other) = delete;
 
   struct RecursiveInfo
   {
     Rectangle itsRectangle;
-    std::shared_ptr<RecursiveInfo> itsLeft;
-    std::shared_ptr<RecursiveInfo> itsRight;
+    std::unique_ptr<RecursiveInfo> itsLeft;
+    std::unique_ptr<RecursiveInfo> itsRight;
   };
 
   size_type itsMaxSize;
 
-  typedef std::shared_ptr<RecursiveInfo> node_type;
+  using node_type = std::unique_ptr<RecursiveInfo>;
   node_type itsRoot;
 
   void recurse(node_type& theNode,
@@ -232,7 +234,8 @@ class CoordinateHints : public Traits
                             coord_type theXMax,
                             coord_type theYMax) const
   {
-    if (!theRectangle.isvalid) return false;
+    if (!theRectangle.isvalid)
+      return false;
 
     // No overlap if some mimimum is greater than the other maximum
 
@@ -253,7 +256,8 @@ class CoordinateHints : public Traits
 
     bool ok = rectangle_intersects(theNode->itsRectangle, theXMin, theYMin, theXMax, theYMax);
 
-    if (!ok) return false;
+    if (!ok)
+      return false;
 
     bool haschildren = (theNode->itsLeft.get() != 0 && theNode->itsRight.get() != 0);
 
@@ -265,9 +269,12 @@ class CoordinateHints : public Traits
     {
       bool leftok = find(theRectangles, theNode->itsLeft, theXMin, theYMin, theXMax, theYMax);
       bool rightok = find(theRectangles, theNode->itsRight, theXMin, theYMin, theXMax, theYMax);
-      if (leftok && rightok) return true;
-      if (leftok) theRectangles.push_back(theNode->itsLeft->itsRectangle);
-      if (rightok) theRectangles.push_back(theNode->itsRight->itsRectangle);
+      if (leftok && rightok)
+        return true;
+      if (leftok)
+        theRectangles.push_back(theNode->itsLeft->itsRectangle);
+      if (rightok)
+        theRectangles.push_back(theNode->itsRight->itsRectangle);
       return false;
     }
   }

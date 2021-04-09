@@ -67,30 +67,34 @@ class Hints : public Traits
   rectangles get_rectangles(value_type theValue) const
   {
     rectangles ret;
-    if (find(ret, itsRoot, theValue)) ret.push_back(itsRoot->itsRectangle);
+    if (find(ret, itsRoot, theValue))
+      ret.push_back(itsRoot->itsRectangle);
     return ret;
   }
 
   rectangles get_rectangles(value_type theLoLimit, value_type theHiLimit) const
   {
     rectangles ret;
-    if (find(ret, itsRoot, theLoLimit, theHiLimit)) ret.push_back(itsRoot->itsRectangle);
+    if (find(ret, itsRoot, theLoLimit, theHiLimit))
+      ret.push_back(itsRoot->itsRectangle);
     return ret;
   }
 
  private:
-  Hints();
+  Hints() = delete;
+  Hints(const Hints& other) = delete;
+  Hints& operator=(const Hints& other) = delete;
 
   struct RecursiveInfo
   {
     Rectangle itsRectangle;
-    std::shared_ptr<RecursiveInfo> itsLeft;
-    std::shared_ptr<RecursiveInfo> itsRight;
+    std::unique_ptr<RecursiveInfo> itsLeft;
+    std::unique_ptr<RecursiveInfo> itsRight;
   };
 
   size_type itsMaxSize;
 
-  typedef std::shared_ptr<RecursiveInfo> node_type;
+  using node_type = std::unique_ptr<RecursiveInfo>;
   node_type itsRoot;
 
   void recurse(node_type& theNode,
@@ -191,8 +195,10 @@ class Hints : public Traits
 
     if (!this->missing(theValue))
     {
-      if (nodemissing) return false;
-      if (nodemin <= theValue && theValue <= nodemax) return true;
+      if (nodemissing)
+        return false;
+      if (nodemin <= theValue && theValue <= nodemax)
+        return true;
       return false;
     }
     else
@@ -213,14 +219,18 @@ class Hints : public Traits
     {
       if (!this->missing(theHiLimit))  // searched range: x..y
       {
-        if (nodemissing) return false;
-        if (std::max(theLoLimit, nodemin) <= std::min(theHiLimit, nodemax)) return true;
+        if (nodemissing)
+          return false;
+        if (std::max(theLoLimit, nodemin) <= std::min(theHiLimit, nodemax))
+          return true;
         return false;
       }
       else  // searched range: x..inf
       {
-        if (nodemissing) return false;
-        if (nodemax >= theLoLimit) return true;
+        if (nodemissing)
+          return false;
+        if (nodemax >= theLoLimit)
+          return true;
         return false;
       }
     }
@@ -228,13 +238,16 @@ class Hints : public Traits
     {
       if (!this->missing(theHiLimit))  // searched range: -inf..y
       {
-        if (nodemissing) return false;
-        if (nodemin <= theHiLimit) return true;
+        if (nodemissing)
+          return false;
+        if (nodemin <= theHiLimit)
+          return true;
         return false;
       }
       else  // searched range: -inf..inf
       {
-        if (!nodemissing) return true;
+        if (!nodemissing)
+          return true;
         return false;
       }
     }
@@ -248,7 +261,8 @@ class Hints : public Traits
 
     bool ok = rectangle_intersects(theNode->itsRectangle, theValue);
 
-    if (!ok) return false;
+    if (!ok)
+      return false;
 
     if (!haschildren)
     {
@@ -258,9 +272,12 @@ class Hints : public Traits
     {
       bool leftok = find(theRectangles, theNode->itsLeft, theValue);
       bool rightok = find(theRectangles, theNode->itsRight, theValue);
-      if (leftok && rightok) return true;
-      if (leftok) theRectangles.push_back(theNode->itsLeft->itsRectangle);
-      if (rightok) theRectangles.push_back(theNode->itsRight->itsRectangle);
+      if (leftok && rightok)
+        return true;
+      if (leftok)
+        theRectangles.push_back(theNode->itsLeft->itsRectangle);
+      if (rightok)
+        theRectangles.push_back(theNode->itsRight->itsRectangle);
       return false;
     }
   }
@@ -276,7 +293,8 @@ class Hints : public Traits
 
     bool ok = rectangle_intersects(theNode->itsRectangle, theLoLimit, theHiLimit);
 
-    if (!ok) return false;
+    if (!ok)
+      return false;
 
     if (!haschildren)
     {
@@ -286,9 +304,12 @@ class Hints : public Traits
     {
       bool leftok = find(theRectangles, theNode->itsLeft, theLoLimit, theHiLimit);
       bool rightok = find(theRectangles, theNode->itsRight, theLoLimit, theHiLimit);
-      if (leftok && rightok) return true;
-      if (leftok) theRectangles.push_back(theNode->itsLeft->itsRectangle);
-      if (rightok) theRectangles.push_back(theNode->itsRight->itsRectangle);
+      if (leftok && rightok)
+        return true;
+      if (leftok)
+        theRectangles.push_back(theNode->itsLeft->itsRectangle);
+      if (rightok)
+        theRectangles.push_back(theNode->itsRight->itsRectangle);
       return false;
     }
   }
