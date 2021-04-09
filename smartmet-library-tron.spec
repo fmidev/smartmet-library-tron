@@ -4,7 +4,7 @@
 %define debug_package %{nil}
 Summary: tron library
 Name: %{SPECNAME}
-Version: 21.4.8
+Version: 21.4.9
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -54,6 +54,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/lib%{LIBNAME}.a
 
 %changelog
+* Fri Apr  9 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.4.9-1.fmi
+- Use Robin Hood unordered_set for speed
+- Added SmallVector to avoid std::vector malloc/free calls
+
 * Thu Apr  8 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.4.8-1.fmi
 - Fixed saddle point detection
 - Reserve vector sizes in advance for a great speed improvement

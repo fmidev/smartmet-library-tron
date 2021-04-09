@@ -12,14 +12,15 @@
 #include "FlipGrid.h"
 #include "FlipSet.h"
 #include "Missing.h"
+#include "SmallVector.h"
 #include <cassert>
 #include <vector>
 
 namespace Tron
 {
 // Push only if the last coordinate is not already there
-template <typename T, typename C>
-static void unique_push(std::vector<T>& x, std::vector<T>& y, C xnext, C ynext)
+template <typename VectorType, typename C>
+static void unique_push(VectorType& x, VectorType& y, C xnext, C ynext)
 {
   std::size_t n = x.size() - 1;
   if (x.empty() || x[n] != xnext || y[n] != ynext)
@@ -111,7 +112,8 @@ class LinearInterpolation : public Traits
 
   // Produce a line
 
-  static void flush_line(std::vector<coord_type>& x, std::vector<coord_type>& y, MyFlipSet& flipset)
+  template <typename VectorType>
+  static void flush_line(VectorType& x, VectorType& y, MyFlipSet& flipset)
   {
     if (x.size() == 2)
     {
@@ -130,24 +132,24 @@ class LinearInterpolation : public Traits
 
   // Connect intersections found from a triangle or rectangle
 
-  static void flush_polygon(std::vector<coord_type>& x,
-                            std::vector<coord_type>& y,
-                            MyFlipSet& flipset)
+  template <typename VectorType>
+  static void flush_polygon(VectorType& x, VectorType& y, MyFlipSet& flipset)
   {
-    if (x.size() > 2)
+    const auto n = x.size();
+    if (n > 2)
     {
-      for (unsigned int i = 0; i < x.size(); i++)
-      {
-        unsigned int j = (i + 1) % x.size();
-        flipset.eflip(MyEdge(x[i], y[i], x[j], y[j]));
-      }
+      for (unsigned int i = 0; i < n - 1; i++)
+        flipset.eflip(MyEdge(x[i], y[i], x[i + 1], y[i + 1]));
+
+      flipset.eflip(MyEdge(x[n - 1], y[n - 1], x[0], y[0]));
     }
     x.clear();
     y.clear();
   }
 
-  static void intersect(std::vector<coord_type>& x,
-                        std::vector<coord_type>& y,
+  template <typename VectorType>
+  static void intersect(VectorType& x,
+                        VectorType& y,
                         coord_type x1,
                         coord_type y1,
                         value_type z1,
@@ -233,8 +235,9 @@ class LinearInterpolation : public Traits
   // The logic for the algorithm is explained in the
   // calling method.
 
-  static void intersect(std::vector<coord_type>& x,
-                        std::vector<coord_type>& y,
+  template <typename VectorType>
+  static void intersect(VectorType& x,
+                        VectorType& y,
                         coord_type x1,
                         coord_type y1,
                         value_type z1,
@@ -667,7 +670,7 @@ class LinearInterpolation : public Traits
     // to imagine contouring from -inf to isovalue, and think what
     // the resulting orientation would then be.
 
-    std::vector<coord_type> x, y;
+    SmallVector<coord_type, 10U> x, y;
     intersect(x, y, x1, y1, z1, c1, x2, y2, z2, c2, value);
     intersect(x, y, x2, y2, z2, c2, x3, y3, z3, c3, value);
     place_type final_place = c3;
@@ -733,7 +736,7 @@ class LinearInterpolation : public Traits
       if (c1 == c2 && c2 == c3 && c3 == c4)
         return;
 
-      std::vector<coord_type> x, y;
+      SmallVector<coord_type, 10U> x, y;
       if (c1 == Below)
       {
         if (c2 == Below)
@@ -981,9 +984,7 @@ class LinearInterpolation : public Traits
 
       if (!saddlepoint)
       {
-        std::vector<coord_type> x, y;
-        x.reserve(10);
-        y.reserve(10);
+        SmallVector<coord_type, 10U> x, y;
         intersect(x, y, x1, y1, z1, c1, x2, y2, z2, c2, lo, hi);
         intersect(x, y, x2, y2, z2, c2, x3, y3, z3, c3, lo, hi);
         intersect(x, y, x3, y3, z3, c3, x4, y4, z4, c4, lo, hi);
