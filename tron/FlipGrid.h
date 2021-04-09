@@ -30,7 +30,7 @@ namespace Tron
 class FlipGrid
 {
  public:
-  typedef std::vector<std::size_t> value_type;
+  using value_type = std::vector<std::size_t>;
 
   FlipGrid(std::size_t width, std::size_t height);
 
@@ -46,18 +46,6 @@ class FlipGrid
  private:
   FlipGrid();
 
-  // Calculate edge indices
-  std::size_t top(std::size_t i, std::size_t j) const;
-  std::size_t left(std::size_t i, std::size_t j) const;
-  std::size_t right(std::size_t i, std::size_t j) const;
-  std::size_t bottom(std::size_t i, std::size_t j) const;
-
-  // Inverse calculations
-  std::size_t i1pos(std::size_t index) const;
-  std::size_t j1pos(std::size_t index) const;
-  std::size_t i2pos(std::size_t index) const;
-  std::size_t j2pos(std::size_t index) const;
-
   std::size_t itsWidth;
   std::size_t itsHeight;
   std::size_t itsSize;
@@ -72,33 +60,13 @@ class FlipGrid
     Bottom
   };
 
-  void flip(Side side, std::size_t index);
-
   // We save size here since standard does not speficy the size of enums (32-bit?)
-  typedef std::vector<char> storage_type;
-  storage_type itsEdges;
+  using storage_type = std::vector<char>;
+
+  storage_type itsVerticalEdges;
+  storage_type itsHorizontalEdges;
 
 };  // class FlipGrid
-
-// ----------------------------------------------------------------------
-/*!
- * \brief Flip a side
- */
-// ----------------------------------------------------------------------
-
-inline void FlipGrid::flip(Side side, std::size_t index)
-{
-  if (itsEdges[index] == None)
-  {
-    itsEdges[index] = side;
-    ++itsSize;
-  }
-  else
-  {
-    itsEdges[index] = None;
-    --itsSize;
-  }
-}
 
 // ----------------------------------------------------------------------
 /*!
@@ -106,154 +74,145 @@ inline void FlipGrid::flip(Side side, std::size_t index)
  */
 // ----------------------------------------------------------------------
 
-inline void FlipGrid::flipLeft(std::size_t i, std::size_t j) { flip(Left, left(i, j)); }
+inline void FlipGrid::flipLeft(std::size_t i, std::size_t j)
+{
+  const auto pos = j * itsWidth + i;
+  if (itsVerticalEdges[pos] == None)
+  {
+    itsVerticalEdges[pos] = Left;
+    ++itsSize;
+  }
+  else
+  {
+    itsVerticalEdges[pos] = None;
+    --itsSize;
+  }
+}
+
 // ----------------------------------------------------------------------
 /*!
  * \brief Flip a top edge
  */
 // ----------------------------------------------------------------------
 
-inline void FlipGrid::flipTop(std::size_t i, std::size_t j) { flip(Top, top(i, j)); }
+inline void FlipGrid::flipTop(std::size_t i, std::size_t j)
+{
+  const auto pos = (j + 1) * itsWidth + i;
+  if (itsHorizontalEdges[pos] == None)
+  {
+    itsHorizontalEdges[pos] = Top;
+    ++itsSize;
+  }
+  else
+  {
+    itsHorizontalEdges[pos] = None;
+    --itsSize;
+  }
+}
 // ----------------------------------------------------------------------
 /*!
  * \brief Flip a right edge
  */
 // ----------------------------------------------------------------------
 
-inline void FlipGrid::flipRight(std::size_t i, std::size_t j) { flip(Right, right(i, j)); }
+inline void FlipGrid::flipRight(std::size_t i, std::size_t j)
+{
+  const auto pos = j * itsWidth + i + 1;
+  if (itsVerticalEdges[pos] == None)
+  {
+    itsVerticalEdges[pos] = Right;
+    ++itsSize;
+  }
+  else
+  {
+    itsVerticalEdges[pos] = None;
+    --itsSize;
+  }
+}
 // ----------------------------------------------------------------------
 /*!
  * \brief Flip a bottom edge
  */
 // ----------------------------------------------------------------------
 
-inline void FlipGrid::flipBottom(std::size_t i, std::size_t j) { flip(Bottom, bottom(i, j)); }
-// ----------------------------------------------------------------------
-/*!
- * \brief Convert (i,j) to edge index
- */
-// ----------------------------------------------------------------------
-
-inline std::size_t FlipGrid::top(std::size_t i, std::size_t j) const
+inline void FlipGrid::flipBottom(std::size_t i, std::size_t j)
 {
-  return (2 * itsWidth - 1) * j + i;
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief Convert (i,j) to edge index
- */
-// ----------------------------------------------------------------------
-
-inline std::size_t FlipGrid::left(std::size_t i, std::size_t j) const
-{
-  return (2 * itsWidth - 1) * j + itsWidth + i - 1;
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief Convert (i,j) to edge index
- */
-// ----------------------------------------------------------------------
-
-inline std::size_t FlipGrid::right(std::size_t i, std::size_t j) const
-{
-  return (2 * itsWidth - 1) * j + itsWidth + i;
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief Convert (i,j) to edge index
- */
-// ----------------------------------------------------------------------
-
-inline std::size_t FlipGrid::bottom(std::size_t i, std::size_t j) const
-{
-  return (2 * itsWidth - 1) * (j + 1) + i;
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief Convert edge index to i1
- */
-// ----------------------------------------------------------------------
-
-inline std::size_t FlipGrid::i1pos(std::size_t index) const
-{
-  std::size_t x = index % (2 * itsWidth - 1);
-  if (x >= itsWidth - 1) x -= (itsWidth - 1);
-  return x;
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief Convert edge index to j1 in (i,j)
- */
-// ----------------------------------------------------------------------
-
-inline std::size_t FlipGrid::j1pos(std::size_t index) const
-{
-  std::size_t y = index / (2 * itsWidth - 1);
-  return y;
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief Convert edge index to i2
- */
-// ----------------------------------------------------------------------
-
-inline std::size_t FlipGrid::i2pos(std::size_t index) const
-{
-  std::size_t x = index % (2 * itsWidth - 1);
-  if (x >= itsWidth - 1)
-    x -= (itsWidth - 1);
+  const auto pos = j * itsWidth + i;
+  if (itsHorizontalEdges[pos] == None)
+  {
+    itsHorizontalEdges[pos] = Bottom;
+    ++itsSize;
+  }
   else
-    ++x;
-  return x;
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief Convert edge index to j2 in (i,j)
- */
-// ----------------------------------------------------------------------
-
-inline std::size_t FlipGrid::j2pos(std::size_t index) const
-{
-  std::size_t y = index / (2 * itsWidth - 1);
-  if (index % (2 * itsWidth - 1) >= itsWidth - 1) ++y;
-  return y;
+  {
+    itsHorizontalEdges[pos] = None;
+    --itsSize;
+  }
 }
 
 // Copy flipgrid edges to a flipset
 template <typename Grid, typename FlipSet>
 void FlipGrid::copy(const Grid& grid, FlipSet& flipset) const
 {
-  if (itsSize == 0) return;
+  if (itsSize == 0)
+    return;
 
-  storage_type::size_type n = itsEdges.size();
-  for (storage_type::size_type i = 0; i < n; i++)
+  for (std::size_t j = 0; j < itsHeight; j++)
   {
-    Side side = Side(itsEdges[i]);
-    if (side != None)
+    const auto pos = j * itsWidth;
+    for (std::size_t i = 0; i < itsWidth; i++)
     {
-      std::size_t i1 = i1pos(i);
-      std::size_t i2 = i2pos(i);
-      std::size_t j1 = j1pos(i);
-      std::size_t j2 = j2pos(i);
-      typename Grid::coord_type x1 = grid.x(i1, j1);
-      typename Grid::coord_type y1 = grid.y(i1, j1);
-      typename Grid::coord_type x2 = grid.x(i2, j2);
-      typename Grid::coord_type y2 = grid.y(i2, j2);
-      if (side == Right || side == Top)
+      const auto n = pos + i;
+      const Side side = Side(itsHorizontalEdges[n]);
+      if (side == None)
       {
-        // Preserve original edge orientation
-        std::swap(x1, x2);
-        std::swap(y1, y2);
       }
-      // eflip since projected coordinates may be identical at the poles
-      flipset.eflip(typename FlipSet::value_type(x1, y1, x2, y2));
+      else if (side == Bottom)
+      {
+        auto x1 = grid.x(i + 1, j);
+        auto y1 = grid.y(i + 1, j);
+        auto x2 = grid.x(i, j);
+        auto y2 = grid.y(i, j);
+        // eflip since projected coordinates may be identical at the poles
+        flipset.eflip(typename FlipSet::value_type(x1, y1, x2, y2));
+      }
+      else if (side == Top)
+      {
+        auto x1 = grid.x(i, j);
+        auto y1 = grid.y(i, j);
+        auto x2 = grid.x(i + 1, j);
+        auto y2 = grid.y(i + 1, j);
+        flipset.eflip(typename FlipSet::value_type(x1, y1, x2, y2));
+      }
+    }
+  }
+
+  for (std::size_t j = 0; j < itsHeight; j++)
+  {
+    const auto pos = j * itsWidth;
+    for (std::size_t i = 0; i < itsWidth; i++)
+    {
+      const auto n = pos + i;
+      const Side side = Side(itsVerticalEdges[n]);
+      if (side == None)
+      {
+      }
+      else if (side == Left)
+      {
+        auto x1 = grid.x(i, j);
+        auto y1 = grid.y(i, j);
+        auto x2 = grid.x(i, j + 1);
+        auto y2 = grid.y(i, j + 1);
+        flipset.eflip(typename FlipSet::value_type(x1, y1, x2, y2));
+      }
+      else if (side == Right)
+      {
+        auto x1 = grid.x(i, j + 1);
+        auto y1 = grid.y(i, j + 1);
+        auto x2 = grid.x(i, j);
+        auto y2 = grid.y(i, j);
+        flipset.eflip(typename FlipSet::value_type(x1, y1, x2, y2));
+      }
     }
   }
 }

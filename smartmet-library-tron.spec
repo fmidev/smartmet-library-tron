@@ -57,6 +57,7 @@ rm -rf $RPM_BUILD_ROOT
 * Fri Apr  9 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.4.9-1.fmi
 - Use Robin Hood unordered_set for speed
 - Added SmallVector to avoid std::vector malloc/free calls
+- Optimized FlipGrid for speed
 
 * Thu Apr  8 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.4.8-1.fmi
 - Fixed saddle point detection
