@@ -20,8 +20,8 @@ FlipGrid::FlipGrid(size_t width, size_t height)
     throw runtime_error("FlipGrid height must be atleast 2");
 
   const size_t n = itsWidth * itsHeight;
-  itsHorizontalEdges.resize(n, None);
-  itsVerticalEdges.resize(n, None);
+  itsHorizontalEdges.resize(n, Side::None);
+  itsVerticalEdges.resize(n, Side::None);
 }
 
 }  // namespace Tron

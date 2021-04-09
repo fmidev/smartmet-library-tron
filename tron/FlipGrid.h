@@ -23,6 +23,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <vector>
 
 namespace Tron
@@ -51,7 +52,7 @@ class FlipGrid
   std::size_t itsSize;
 
   // Flipping a None sets the enum value, otherwise the value is set to None
-  enum Side
+  enum class Side : std::uint8_t
   {
     None,
     Top,
@@ -61,7 +62,7 @@ class FlipGrid
   };
 
   // We save size here since standard does not speficy the size of enums (32-bit?)
-  using storage_type = std::vector<char>;
+  using storage_type = std::vector<Side>;
 
   storage_type itsVerticalEdges;
   storage_type itsHorizontalEdges;
@@ -77,14 +78,14 @@ class FlipGrid
 inline void FlipGrid::flipLeft(std::size_t i, std::size_t j)
 {
   const auto pos = j * itsWidth + i;
-  if (itsVerticalEdges[pos] == None)
+  if (itsVerticalEdges[pos] == Side::None)
   {
-    itsVerticalEdges[pos] = Left;
+    itsVerticalEdges[pos] = Side::Left;
     ++itsSize;
   }
   else
   {
-    itsVerticalEdges[pos] = None;
+    itsVerticalEdges[pos] = Side::None;
     --itsSize;
   }
 }
@@ -98,14 +99,14 @@ inline void FlipGrid::flipLeft(std::size_t i, std::size_t j)
 inline void FlipGrid::flipTop(std::size_t i, std::size_t j)
 {
   const auto pos = (j + 1) * itsWidth + i;
-  if (itsHorizontalEdges[pos] == None)
+  if (itsHorizontalEdges[pos] == Side::None)
   {
-    itsHorizontalEdges[pos] = Top;
+    itsHorizontalEdges[pos] = Side::Top;
     ++itsSize;
   }
   else
   {
-    itsHorizontalEdges[pos] = None;
+    itsHorizontalEdges[pos] = Side::None;
     --itsSize;
   }
 }
@@ -118,14 +119,14 @@ inline void FlipGrid::flipTop(std::size_t i, std::size_t j)
 inline void FlipGrid::flipRight(std::size_t i, std::size_t j)
 {
   const auto pos = j * itsWidth + i + 1;
-  if (itsVerticalEdges[pos] == None)
+  if (itsVerticalEdges[pos] == Side::None)
   {
-    itsVerticalEdges[pos] = Right;
+    itsVerticalEdges[pos] = Side::Right;
     ++itsSize;
   }
   else
   {
-    itsVerticalEdges[pos] = None;
+    itsVerticalEdges[pos] = Side::None;
     --itsSize;
   }
 }
@@ -138,14 +139,14 @@ inline void FlipGrid::flipRight(std::size_t i, std::size_t j)
 inline void FlipGrid::flipBottom(std::size_t i, std::size_t j)
 {
   const auto pos = j * itsWidth + i;
-  if (itsHorizontalEdges[pos] == None)
+  if (itsHorizontalEdges[pos] == Side::None)
   {
-    itsHorizontalEdges[pos] = Bottom;
+    itsHorizontalEdges[pos] = Side::Bottom;
     ++itsSize;
   }
   else
   {
-    itsHorizontalEdges[pos] = None;
+    itsHorizontalEdges[pos] = Side::None;
     --itsSize;
   }
 }
@@ -163,11 +164,11 @@ void FlipGrid::copy(const Grid& grid, FlipSet& flipset) const
     for (std::size_t i = 0; i < itsWidth; i++)
     {
       const auto n = pos + i;
-      const Side side = Side(itsHorizontalEdges[n]);
-      if (side == None)
+      const auto side = itsHorizontalEdges[n];
+      if (side == Side::None)
       {
       }
-      else if (side == Bottom)
+      else if (side == Side::Bottom)
       {
         auto x1 = grid.x(i + 1, j);
         auto y1 = grid.y(i + 1, j);
@@ -176,7 +177,7 @@ void FlipGrid::copy(const Grid& grid, FlipSet& flipset) const
         // eflip since projected coordinates may be identical at the poles
         flipset.eflip(typename FlipSet::value_type(x1, y1, x2, y2));
       }
-      else if (side == Top)
+      else if (side == Side::Top)
       {
         auto x1 = grid.x(i, j);
         auto y1 = grid.y(i, j);
@@ -193,11 +194,11 @@ void FlipGrid::copy(const Grid& grid, FlipSet& flipset) const
     for (std::size_t i = 0; i < itsWidth; i++)
     {
       const auto n = pos + i;
-      const Side side = Side(itsVerticalEdges[n]);
-      if (side == None)
+      const auto side = itsVerticalEdges[n];
+      if (side == Side::None)
       {
       }
-      else if (side == Left)
+      else if (side == Side::Left)
       {
         auto x1 = grid.x(i, j);
         auto y1 = grid.y(i, j);
@@ -205,7 +206,7 @@ void FlipGrid::copy(const Grid& grid, FlipSet& flipset) const
         auto y2 = grid.y(i, j + 1);
         flipset.eflip(typename FlipSet::value_type(x1, y1, x2, y2));
       }
-      else if (side == Right)
+      else if (side == Side::Right)
       {
         auto x1 = grid.x(i, j + 1);
         auto y1 = grid.y(i, j + 1);
