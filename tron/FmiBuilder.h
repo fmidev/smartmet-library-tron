@@ -41,9 +41,8 @@ l* Building utility for FMI.
 #pragma once
 
 #include "Ring.h"
-
+#include "SmallVector.h"
 #include <boost/foreach.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/optional.hpp>
 #include <boost/utility.hpp>
 #include <geos/algorithm/CGAlgorithmsDD.h>
@@ -86,11 +85,11 @@ class FmiBuilder : private boost::noncopyable
 };  // class FmiBuilder
 
 // To which polyline is an edge assigned to
-typedef std::vector<int> Targets;
+using Targets = std::vector<int>;
 
 // Representative non-vertical edge from a polyline
 
-typedef std::vector<std::size_t> EdgeFromRing;
+using EdgeFromRing = std::vector<std::size_t>;
 
 // ----------------------------------------------------------------------
 /*!
@@ -154,7 +153,7 @@ template <typename Edges>
 long pick_free_edge(const Edges &edges, const Targets &targets, long index)
 {
   const std::size_t ntargets = targets.size();
-  std::size_t i = boost::numeric_cast<std::size_t>(index);
+  std::size_t i = static_cast<std::size_t>(index);
   for (; i < ntargets; ++i)
   {
     if (targets[i] < 0)
@@ -287,7 +286,7 @@ long pick_best_match(const Polylines &polylines,
   // built. Note that there may be several edges leaving the same point, we actually
   // have to search the last node with the same coordinate to cut the ring.
 
-  std::vector<long> available;
+  SmallVector<long, 10> available;
 
   for (long i = pos; i < nedges; i++)
   {
@@ -510,8 +509,8 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
 {
   namespace gg = geos::geom;
 
-  typedef Ring<Traits> Polyline;
-  typedef typename std::vector<Polyline> Polylines;
+  using Polyline = Ring<Traits>;
+  using Polylines = std::vector<Polyline>;
 
   // Objects to be created are closed rings and polylines,
   // but for now we do not separate them so we'll get the
