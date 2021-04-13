@@ -736,156 +736,177 @@ class LinearInterpolation : public Traits
       if (c1 == c2 && c2 == c3 && c3 == c4)
         return;
 
-      SmallVector<coord_type, 10U> x, y;
-      if (c1 == Below)
+      // Note: We must determine whether there is a saddle in the data
+      // without using the contour limits so that the same decision
+      // will be made for all contours. We also want the isolines to match
+      // isobands.
+
+      bool saddlepoint = is_saddle(z1, z2, z3, z4);
+
+      if (saddlepoint)
       {
-        if (c2 == Below)
-        {
-          if (c3 == Below)
-          {
-            if (c4 == Below)
-            {
-            }
-            else  // BBBA
-            {
-              intersect(x, y, x4, y4, z4, c4, x1, y1, z1, c1, value);
-              intersect(x, y, x3, y3, z3, c3, x4, y4, z4, c4, value);
-            }
-          }
-          else
-          {
-            if (c4 == Below)  // BBAB
-            {
-              intersect(x, y, x3, y3, z3, c3, x4, y4, z4, c4, value);
-              intersect(x, y, x2, y2, z2, c2, x3, y3, z3, c3, value);
-            }
-            else  // BBAA
-            {
-              intersect(x, y, x4, y4, z4, c4, x1, y1, z1, c1, value);
-              intersect(x, y, x2, y2, z2, c2, x3, y3, z3, c3, value);
-            }
-          }
-        }
-        else
-        {
-          if (c3 == Below)
-          {
-            if (c4 == Below)  // BABB
-            {
-              intersect(x, y, x2, y2, z2, c2, x3, y3, z3, c3, value);
-              intersect(x, y, x1, y1, z1, c1, x2, y2, z2, c2, value);
-            }
-            else  // BABA
-            {
-              value_type z0 = (z1 + z2 + z3 + z4) / 4;
-              place_type c0 = placement(z0, value);
-              if (c0 == c1)  // Below
-              {
-                intersect(x, y, x2, y2, z2, c2, x3, y3, z3, c3, value);
-                intersect(x, y, x1, y1, z1, c1, x2, y2, z2, c2, value);
-                flush_line(x, y, flipset);
-                intersect(x, y, x4, y4, z4, c4, x1, y1, z1, c1, value);
-                intersect(x, y, x3, y3, z3, c3, x4, y4, z4, c4, value);
-              }
-              else
-              {
-                intersect(x, y, x4, y4, z4, c4, x1, y1, z1, c1, value);
-                intersect(x, y, x1, y1, z1, c1, x2, y2, z2, c2, value);
-                flush_line(x, y, flipset);
-                intersect(x, y, x2, y2, z2, c2, x3, y3, z3, c3, value);
-                intersect(x, y, x3, y3, z3, c3, x4, y4, z4, c4, value);
-              }
-            }
-          }
-          else
-          {
-            if (c4 == Below)  // BAAB
-            {
-              intersect(x, y, x3, y3, z3, c3, x4, y4, z4, c4, value);
-              intersect(x, y, x1, y1, z1, c1, x2, y2, z2, c2, value);
-            }
-            else  // BAAA
-            {
-              intersect(x, y, x4, y4, z4, c4, x1, y1, z1, c1, value);
-              intersect(x, y, x1, y1, z1, c1, x2, y2, z2, c2, value);
-            }
-          }
-        }
-      }
-      else if (c2 == Below)
-      {
-        if (c3 == Below)
-        {
-          if (c4 == Below)  // ABBB
-          {
-            intersect(x, y, x1, y1, z1, c1, x2, y2, z2, c2, value);
-            intersect(x, y, x4, y4, z4, c4, x1, y1, z1, c1, value);
-          }
-          else  // ABBA
-          {
-            intersect(x, y, x1, y1, z1, c1, x2, y2, z2, c2, value);
-            intersect(x, y, x3, y3, z3, c3, x4, y4, z4, c4, value);
-          }
-        }
-        else
-        {
-          if (c4 == Below)  // ABAB
-          {
-            value_type z0 = (z1 + z2 + z3 + z4) / 4;
-            place_type c0 = placement(z0, value);
-            if (c0 == c1)  // Above
-            {
-              intersect(x, y, x1, y1, z1, c1, x2, y2, z2, c2, value);
-              intersect(x, y, x2, y2, z2, c2, x3, y3, z3, c3, value);
-              flush_line(x, y, flipset);
-              intersect(x, y, x3, y3, z3, c3, x4, y4, z4, c4, value);
-              intersect(x, y, x4, y4, z4, c4, x1, y1, z1, c1, value);
-            }
-            else
-            {
-              intersect(x, y, x1, y1, z1, c1, x2, y2, z2, c2, value);
-              intersect(x, y, x4, y4, z4, c4, x1, y1, z1, c1, value);
-              flush_line(x, y, flipset);
-              intersect(x, y, x3, y3, z3, c3, x4, y4, z4, c4, value);
-              intersect(x, y, x2, y2, z2, c2, x3, y3, z3, c3, value);
-            }
-          }
-          else  // ABAA
-          {
-            intersect(x, y, x1, y1, z1, c1, x2, y2, z2, c2, value);
-            intersect(x, y, x2, y2, z2, c2, x3, y3, z3, c3, value);
-          }
-        }
+        coord_type x0 = (x1 + x2 + x3 + x4) / 4;
+        coord_type y0 = (y1 + y2 + y3 + y4) / 4;
+        value_type z0 = (z1 + z2 + z3 + z4) / 4;
+
+        triangle(x1, y1, z1, x2, y2, z2, x0, y0, z0, value, flipset);
+        triangle(x2, y2, z2, x3, y3, z3, x0, y0, z0, value, flipset);
+        triangle(x3, y3, z3, x4, y4, z4, x0, y0, z0, value, flipset);
+        triangle(x4, y4, z4, x1, y1, z1, x0, y0, z0, value, flipset);
       }
       else
       {
-        if (c3 == Below)
+        SmallVector<coord_type, 10U> x, y;
+        if (c1 == Below)
         {
-          if (c4 == Below)  // AABB
+          if (c2 == Below)
           {
-            intersect(x, y, x2, y2, z2, c2, x3, y3, z3, c3, value);
-            intersect(x, y, x4, y4, z4, c4, x1, y1, z1, c1, value);
+            if (c3 == Below)
+            {
+              if (c4 == Below)
+              {
+              }
+              else  // BBBA
+              {
+                intersect(x, y, x4, y4, z4, c4, x1, y1, z1, c1, value);
+                intersect(x, y, x3, y3, z3, c3, x4, y4, z4, c4, value);
+              }
+            }
+            else
+            {
+              if (c4 == Below)  // BBAB
+              {
+                intersect(x, y, x3, y3, z3, c3, x4, y4, z4, c4, value);
+                intersect(x, y, x2, y2, z2, c2, x3, y3, z3, c3, value);
+              }
+              else  // BBAA
+              {
+                intersect(x, y, x4, y4, z4, c4, x1, y1, z1, c1, value);
+                intersect(x, y, x2, y2, z2, c2, x3, y3, z3, c3, value);
+              }
+            }
           }
-          else  // AABA
+          else
           {
-            intersect(x, y, x2, y2, z2, c2, x3, y3, z3, c3, value);
-            intersect(x, y, x3, y3, z3, c3, x4, y4, z4, c4, value);
+            if (c3 == Below)
+            {
+              if (c4 == Below)  // BABB
+              {
+                intersect(x, y, x2, y2, z2, c2, x3, y3, z3, c3, value);
+                intersect(x, y, x1, y1, z1, c1, x2, y2, z2, c2, value);
+              }
+              else  // BABA
+              {
+                value_type z0 = (z1 + z2 + z3 + z4) / 4;
+                place_type c0 = placement(z0, value);
+                if (c0 == c1)  // Below
+                {
+                  intersect(x, y, x2, y2, z2, c2, x3, y3, z3, c3, value);
+                  intersect(x, y, x1, y1, z1, c1, x2, y2, z2, c2, value);
+                  flush_line(x, y, flipset);
+                  intersect(x, y, x4, y4, z4, c4, x1, y1, z1, c1, value);
+                  intersect(x, y, x3, y3, z3, c3, x4, y4, z4, c4, value);
+                }
+                else
+                {
+                  intersect(x, y, x4, y4, z4, c4, x1, y1, z1, c1, value);
+                  intersect(x, y, x1, y1, z1, c1, x2, y2, z2, c2, value);
+                  flush_line(x, y, flipset);
+                  intersect(x, y, x2, y2, z2, c2, x3, y3, z3, c3, value);
+                  intersect(x, y, x3, y3, z3, c3, x4, y4, z4, c4, value);
+                }
+              }
+            }
+            else
+            {
+              if (c4 == Below)  // BAAB
+              {
+                intersect(x, y, x3, y3, z3, c3, x4, y4, z4, c4, value);
+                intersect(x, y, x1, y1, z1, c1, x2, y2, z2, c2, value);
+              }
+              else  // BAAA
+              {
+                intersect(x, y, x4, y4, z4, c4, x1, y1, z1, c1, value);
+                intersect(x, y, x1, y1, z1, c1, x2, y2, z2, c2, value);
+              }
+            }
+          }
+        }
+        else if (c2 == Below)
+        {
+          if (c3 == Below)
+          {
+            if (c4 == Below)  // ABBB
+            {
+              intersect(x, y, x1, y1, z1, c1, x2, y2, z2, c2, value);
+              intersect(x, y, x4, y4, z4, c4, x1, y1, z1, c1, value);
+            }
+            else  // ABBA
+            {
+              intersect(x, y, x1, y1, z1, c1, x2, y2, z2, c2, value);
+              intersect(x, y, x3, y3, z3, c3, x4, y4, z4, c4, value);
+            }
+          }
+          else
+          {
+            if (c4 == Below)  // ABAB
+            {
+              value_type z0 = (z1 + z2 + z3 + z4) / 4;
+              place_type c0 = placement(z0, value);
+              if (c0 == c1)  // Above
+              {
+                intersect(x, y, x1, y1, z1, c1, x2, y2, z2, c2, value);
+                intersect(x, y, x2, y2, z2, c2, x3, y3, z3, c3, value);
+                flush_line(x, y, flipset);
+                intersect(x, y, x3, y3, z3, c3, x4, y4, z4, c4, value);
+                intersect(x, y, x4, y4, z4, c4, x1, y1, z1, c1, value);
+              }
+              else
+              {
+                intersect(x, y, x1, y1, z1, c1, x2, y2, z2, c2, value);
+                intersect(x, y, x4, y4, z4, c4, x1, y1, z1, c1, value);
+                flush_line(x, y, flipset);
+                intersect(x, y, x3, y3, z3, c3, x4, y4, z4, c4, value);
+                intersect(x, y, x2, y2, z2, c2, x3, y3, z3, c3, value);
+              }
+            }
+            else  // ABAA
+            {
+              intersect(x, y, x1, y1, z1, c1, x2, y2, z2, c2, value);
+              intersect(x, y, x2, y2, z2, c2, x3, y3, z3, c3, value);
+            }
           }
         }
         else
         {
-          if (c4 == Below)  // AAAB
+          if (c3 == Below)
           {
-            intersect(x, y, x3, y3, z3, c3, x4, y4, z4, c4, value);
-            intersect(x, y, x4, y4, z4, c4, x1, y1, z1, c1, value);
+            if (c4 == Below)  // AABB
+            {
+              intersect(x, y, x2, y2, z2, c2, x3, y3, z3, c3, value);
+              intersect(x, y, x4, y4, z4, c4, x1, y1, z1, c1, value);
+            }
+            else  // AABA
+            {
+              intersect(x, y, x2, y2, z2, c2, x3, y3, z3, c3, value);
+              intersect(x, y, x3, y3, z3, c3, x4, y4, z4, c4, value);
+            }
           }
-          else  // AAAA
+          else
           {
+            if (c4 == Below)  // AAAB
+            {
+              intersect(x, y, x3, y3, z3, c3, x4, y4, z4, c4, value);
+              intersect(x, y, x4, y4, z4, c4, x1, y1, z1, c1, value);
+            }
+            else  // AAAA
+            {
+            }
           }
         }
+        if (!x.empty())
+          flush_line(x, y, flipset);
       }
-      if (!x.empty())
-        flush_line(x, y, flipset);
     }
   }
 
