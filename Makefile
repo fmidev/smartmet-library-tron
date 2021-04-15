@@ -22,7 +22,7 @@ LIBS += $(REQUIRED_LIBS)
 
 # What to install
 
-LIBFILE = libsmartmet-$(SUBNAME).a
+LIBFILE = libsmartmet-$(SUBNAME).so
 
 # Compilation directories
 
@@ -47,7 +47,12 @@ release: all
 profile: all
 
 $(LIBFILE): $(OBJS)
-	$(AR) $(ARFLAGS) $(LIBFILE) $(OBJS)
+	$(CXX) $(CFLAGS) -shared -rdynamic -o $(LIBFILE) $(OBJS) $(LIBS)
+	@echo Checking $(LIBFILE) for unresolved references
+	@if ldd -r $(LIBFILE) 2>&1 | c++filt | grep ^undefined\ symbol; \
+		then rm -v $(LIBFILE); \
+		exit 1; \
+	fi
 
 clean:
 	rm -f $(LIBFILE) *~ $(SUBNAME)/*~

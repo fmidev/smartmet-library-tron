@@ -1,10 +1,9 @@
 %define DIRNAME tron
 %define LIBNAME smartmet-%{DIRNAME}
 %define SPECNAME smartmet-library-%{DIRNAME}
-%define debug_package %{nil}
 Summary: tron library
 Name: %{SPECNAME}
-Version: 21.4.13
+Version: 21.4.15
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -50,10 +49,34 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(0664,root,root,0775)
+%{_libdir}/lib%{LIBNAME}.so
+
+%package -n %{SPECNAME}-devel
+Summary: FMI Tron library development files
+Provides: %{SPECNAME}-devel
+Requires: %{SPECNAME} = %{version}-%{release}
+BuildRequires: boost169-devel
+BuildRequires: gcc-c++
+%if %{defined el7}
+BuildRequires: devtoolset-7-gcc-c++
+#TestRequires: devtoolset-7-gcc-c++
+%endif
+BuildRequires: geos39-devel
+BuildRequires: make
+BuildRequires: rpm-build
+BuildRequires: smartmet-library-macgyver-devel >= 21.1.25
+
+%description -n %{SPECNAME}-devel
+FMI Tron library development files
+
+%files -n %{SPECNAME}-devel
+%defattr(0664,root,root,0775)
 %{_includedir}/smartmet/%{DIRNAME}
-%{_libdir}/lib%{LIBNAME}.a
 
 %changelog
+* Thu Apr 15 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.4.15-1.fmi
+- Switch from static to dynamic library
+
 * Tue Apr 13 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.4.13-1.fmi
 - Fixed saddle points to be handled similarly for isolines and isobands
 
