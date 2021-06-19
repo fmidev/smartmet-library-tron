@@ -121,7 +121,6 @@ inline void validate(const std::unique_ptr<geos::geom::Geometry> &geom)
     std::cout << "Valid!" << std::endl;
   }
 #endif
-  return;
 }
 
 // ----------------------------------------------------------------------
@@ -149,11 +148,10 @@ double find_maximum_edge_width(const Edges &edges)
  */
 // ----------------------------------------------------------------------
 
-template <typename Edges>
-long pick_free_edge(const Edges &edges, const Targets &targets, long index)
+long pick_free_edge(const Targets &targets, long index)
 {
-  const std::size_t ntargets = targets.size();
-  std::size_t i = static_cast<std::size_t>(index);
+  const auto ntargets = targets.size();
+  auto i = static_cast<std::size_t>(index);
   for (; i < ntargets; ++i)
   {
     if (targets[i] < 0)
@@ -169,8 +167,7 @@ long pick_free_edge(const Edges &edges, const Targets &targets, long index)
 // ----------------------------------------------------------------------
 
 template <typename Polyline, typename Edges>
-long find_first_match(
-    const Polyline &polyline, const Edges &edges, const Targets &targets, long pos, long lastpos)
+long find_first_match(const Polyline &polyline, const Edges &edges, long pos, long lastpos)
 {
   const long nedges = boost::numeric_cast<long>(edges.size());
 
@@ -482,12 +479,9 @@ boost::optional<std::size_t> find_shell(const Targets &targets,
   // Now select the polygon with the smallest intersection coordinate and an odd number of
   // intersections
 
-  for (std::multimap<double, std::size_t>::const_iterator iter = intersections.begin(),
-                                                          end = intersections.end();
-       iter != end;
-       ++iter)
+  for (const auto &intersection : intersections)
   {
-    std::size_t polyline = iter->second;
+    auto polyline = intersection.second;
     if (counts[polyline] % 2 != 0)
       return polyline;
   }
@@ -533,7 +527,7 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
   while (true)
   {
     // Find next free edge. Done if everything has been processed.
-    edgeindex = pick_free_edge(edges, targets, ++edgeindex);
+    edgeindex = pick_free_edge(targets, ++edgeindex);
     if (edgeindex < 0)
       break;
 
@@ -562,7 +556,7 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
       bool isoline_extension = false;
 
       std::size_t tmp = index;
-      index = find_first_match(polyline, edges, targets, index, lastindex);
+      index = find_first_match(polyline, edges, index, lastindex);
       index = pick_best_match(polylines,
                               polyline,
                               edges,
@@ -644,20 +638,16 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
       // Terminate the polyline if it became closed
       if (polyline.closed())
       {
-        // if (polyline.signedArea() != 0)
-        if (true)
-        {
-          ringedge.push_back(representative_edge(edges, edgeindexes));
-          polylines.emplace_back();
-          std::swap(polylines.back(), polyline);
-        }
-        else
-        {
-          // Discard empty rings - should not happen unless coordinates are degenerate
-          std::cout << "Warning: Discarding empty ring created by contouring" << std::endl;
-          Polyline emptyline;
-          std::swap(emptyline, polyline);
-        }
+#if 1
+        ringedge.push_back(representative_edge(edges, edgeindexes));
+        polylines.emplace_back();
+        std::swap(polylines.back(), polyline);
+#else
+        // Discard empty rings - should not happen unless coordinates are degenerate
+        std::cout << "Warning: Discarding empty ring created by contouring" << std::endl;
+        Polyline emptyline;
+        std::swap(emptyline, polyline);
+#endif
         break;
       }
     }
@@ -701,8 +691,8 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
     else
     {
       std::vector<gg::Geometry *> *parts = new std::vector<geos::geom::Geometry *>;
-      for (std::size_t i = 0; i < lines.size(); i++)
-        parts->push_back(lines[i]);
+      for (const auto &line : lines)
+        parts->push_back(line);
       itsResult.reset(itsFactory.createMultiLineString(parts));
     }
     itsResult->normalize();
@@ -814,23 +804,22 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
 
   if (holes.empty())
   {
-    for (std::size_t i = 0; i < shells.size(); i++)
-      geom->push_back(itsFactory.createPolygon(shells[i], NULL));
+    for (const auto &shell : shells)
+      geom->push_back(itsFactory.createPolygon(shell, nullptr));
   }
   else
   {
     for (std::size_t i = 0; i < shells.size(); i++)
     {
-      std::vector<gg::LinearRing *> *holetransfer = NULL;
+      std::vector<gg::LinearRing *> *holetransfer = nullptr;
 
       const std::vector<std::size_t> &holeindexes = shellholes[i];
 
-      for (std::size_t j = 0; j < holeindexes.size(); j++)
+      for (auto holeindex : holeindexes)
       {
         if (!holetransfer)
           holetransfer = new std::vector<gg::LinearRing *>;
-        // std::cout << "Shell " << i << " has hole " << holeindexes[j] << std::endl;
-        holetransfer->push_back(holes[holeindexes[j]]);
+        holetransfer->push_back(holes[holeindex]);
       }
       auto &&foo = itsFactory.createPolygon(shells[i], holetransfer);
       geom->push_back(foo);
@@ -838,7 +827,7 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
   }
 
   // Create a MULTIPOLYGON if required
-  gg::Geometry *multipolygon = NULL;
+  gg::Geometry *multipolygon = nullptr;
   if (geom->size() == 1)
   {
     multipolygon = (*geom)[0];

@@ -34,6 +34,7 @@ class FlipGrid
   using value_type = std::vector<std::size_t>;
 
   FlipGrid(std::size_t width, std::size_t height);
+  FlipGrid() = delete;
 
   void flipTop(std::size_t i, std::size_t j);
   void flipRight(std::size_t i, std::size_t j);
@@ -45,8 +46,6 @@ class FlipGrid
   void copy(const Grid& grid, FlipSet& flipset) const;
 
  private:
-  FlipGrid();
-
   std::size_t itsWidth;
   std::size_t itsHeight;
   std::size_t itsSize;

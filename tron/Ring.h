@@ -31,14 +31,14 @@ template <typename Traits>
 class Ring
 {
  public:
-  typedef typename Traits::coord_type coord_type;
-  typedef std::pair<coord_type, coord_type> value_type;
-  typedef std::list<value_type> storage_type;
-  typedef typename storage_type::size_type size_type;
-  typedef typename storage_type::iterator iterator;
-  typedef typename storage_type::const_iterator const_iterator;
+  using coord_type = typename Traits::coord_type;
+  using value_type = std::pair<coord_type, coord_type>;
+  using storage_type = std::list<value_type>;
+  using size_type = typename storage_type::size_type;
+  using iterator = typename storage_type::iterator;
+  using const_iterator = typename storage_type::const_iterator;
 
-  Ring() : itsData(), itsAreaOK(false) {}
+  Ring() = default;
   Ring(coord_type x1, coord_type y1, coord_type x2, coord_type y2) : itsData(), itsAreaOK(false)
   {
     itsData.push_back(value_type(x1, y1));
@@ -53,7 +53,8 @@ class Ring
   const value_type& back() const { return itsData.back(); }
   bool closed() const
   {
-    if (empty()) return false;
+    if (empty())
+      return false;
     return (itsData.back() == itsData.front());
   }
 
@@ -61,9 +62,11 @@ class Ring
   // supposed to share Rings between threads.
   coord_type signedArea() const
   {
-    if (itsAreaOK) return itsArea;
+    if (itsAreaOK)
+      return itsArea;
 
-    if (itsData.size() < 2) return 0;
+    if (itsData.size() < 2)
+      return 0;
 
     coord_type area = 0;
     const_iterator next = itsData.begin();
@@ -96,7 +99,8 @@ class Ring
   // Try to extend the end of the polyline
   bool extendEnd(coord_type x1, coord_type y1, coord_type x2, coord_type y2)
   {
-    if (itsData.back().first != x1 || itsData.back().second != y1) return false;
+    if (itsData.back().first != x1 || itsData.back().second != y1)
+      return false;
     itsData.push_back(value_type(x2, y2));
     itsAreaOK = false;
     return true;
@@ -105,8 +109,10 @@ class Ring
   // Try to extend the start of the polyline with another
   bool extendStart(Ring& other, coord_type x1, coord_type y1, coord_type x2, coord_type y2)
   {
-    if (itsData.front().first != x1 || itsData.front().second != y1) return false;
-    if (other.itsData.back().first != x2 || other.itsData.back().second != y2) return false;
+    if (itsData.front().first != x1 || itsData.front().second != y1)
+      return false;
+    if (other.itsData.back().first != x2 || other.itsData.back().second != y2)
+      return false;
     itsData.pop_front();                             // drop the old x1,y1
     itsData.splice(itsData.begin(), other.itsData);  // this will reintroduce it
     return true;
@@ -132,7 +138,8 @@ class Ring
     for (typename storage_type::const_iterator it = begin(); it != end();)
     {
       out << it->first << " " << it->second;
-      if (++it != end()) out << ',';
+      if (++it != end())
+        out << ',';
     }
     return out.str();
   }
@@ -175,7 +182,7 @@ class Ring
   storage_type itsData;
   // The user won't see these changing
   mutable coord_type itsArea;
-  mutable bool itsAreaOK;
+  mutable bool itsAreaOK = false;
 
 };  // class Ring
 
