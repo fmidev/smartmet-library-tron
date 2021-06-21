@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: tron library
 Name: %{SPECNAME}
-Version: 21.6.19
+Version: 21.6.21
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -74,6 +74,9 @@ FMI Tron library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Jun 21 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.6.21-1.fmi
+- Silenced CodeChecker warnings
+
 * Sat Jun 19 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.6.19-1.fmi
 - Silenced CodeChecker warnings
 

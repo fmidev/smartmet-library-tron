@@ -67,6 +67,8 @@ class FmiBuilder : private boost::noncopyable
   ~FmiBuilder() = default;
   FmiBuilder(const FmiBuilder &other) = delete;
   FmiBuilder &operator=(const FmiBuilder &other) = delete;
+  FmiBuilder(FmiBuilder &&other) = delete;
+  FmiBuilder &operator=(FmiBuilder &&other) = delete;
 
   FmiBuilder(const geos::geom::GeometryFactory &theFactory);
 
@@ -148,7 +150,7 @@ double find_maximum_edge_width(const Edges &edges)
  */
 // ----------------------------------------------------------------------
 
-long pick_free_edge(const Targets &targets, long index)
+inline long pick_free_edge(const Targets &targets, long index)
 {
   const auto ntargets = targets.size();
   auto i = static_cast<std::size_t>(index);
@@ -289,12 +291,10 @@ long pick_best_match(const Polylines &polylines,
   {
     if (!(edges[i] == endcoordinate))
       break;
-    if (targets[i] < 0)
-      available.push_back(i);
-    else if (targets[i] == polylineindex)
+    if (targets[i] == polylineindex)
       *self_touch = true;
-    else if (!polylines[targets[i]].closed())
-      // Non-closed polylines are viable candidates for continuation
+    // // Non-closed polylines are viable candidates for continuation
+    else if (targets[i] < 0 || !polylines[targets[i]].closed())
       available.push_back(i);
   }
 
@@ -441,7 +441,8 @@ boost::optional<std::size_t> find_shell(const Targets &targets,
       // "to the left" case though, or the loop may continue until pos=0
       break;
     }
-    else if (y1 < y && y2 < y)
+
+    if (y1 < y && y2 < y)
     {
       // std::cout << "\tbelow\n";
     }
@@ -610,18 +611,16 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
           --polylineindex;
           break;
         }
-        else
-        {
-          // Now we're touching an old polyline somewhere else beside its start point.
-          // Time to stop this polyline.
-          // We could also slice the self-touching part from the older polyline,
-          // this would make the algorithm always take the same right-turning choise
-          // as the isoband algorithm does. Does not seem to be worth the trouble though.
-          ringedge.push_back(representative_edge(edges, edgeindexes));
-          polylines.emplace_back();
-          std::swap(polylines.back(), polyline);
-          break;
-        }
+
+        // Now we're touching an old polyline somewhere else beside its start point.
+        // Time to stop this polyline.
+        // We could also slice the self-touching part from the older polyline,
+        // this would make the algorithm always take the same right-turning choise
+        // as the isoband algorithm does. Does not seem to be worth the trouble though.
+        ringedge.push_back(representative_edge(edges, edgeindexes));
+        polylines.emplace_back();
+        std::swap(polylines.back(), polyline);
+        break;
       }
 
       if (targets[index] < 0)
@@ -690,7 +689,7 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
     }
     else
     {
-      std::vector<gg::Geometry *> *parts = new std::vector<geos::geom::Geometry *>;
+      auto *parts = new std::vector<geos::geom::Geometry *>;
       for (const auto &line : lines)
         parts->push_back(line);
       itsResult.reset(itsFactory.createMultiLineString(parts));
@@ -800,7 +799,7 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
 
   // The built polygons
 
-  std::vector<gg::Geometry *> *geom = new std::vector<gg::Geometry *>;
+  auto *geom = new std::vector<gg::Geometry *>;
 
   if (holes.empty())
   {

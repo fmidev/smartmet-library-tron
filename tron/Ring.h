@@ -39,7 +39,7 @@ class Ring
   using const_iterator = typename storage_type::const_iterator;
 
   Ring() = default;
-  Ring(coord_type x1, coord_type y1, coord_type x2, coord_type y2) : itsData(), itsAreaOK(false)
+  Ring(coord_type x1, coord_type y1, coord_type x2, coord_type y2)
   {
     itsData.push_back(value_type(x1, y1));
     itsData.push_back(value_type(x2, y2));
