@@ -1,7 +1,8 @@
 *~
 *.d
 .sconsign.dblite
-lib*.a
+/lib*.a
+/lib*.so
 obj/
 *Test
 
