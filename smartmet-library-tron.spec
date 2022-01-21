@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: tron library
 Name: %{SPECNAME}
-Version: 21.6.21
+Version: 22.1.21
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -74,6 +74,9 @@ FMI Tron library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri Jan 21 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.1.21-1.fmi
+- Repackage due to upgrade of packages from PGDG repo: gdal-3.4, geos-3.10, proj-8.2
+
 * Mon Jun 21 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.6.21-1.fmi
 - Silenced CodeChecker warnings
 
