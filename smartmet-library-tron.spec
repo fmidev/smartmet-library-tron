@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: tron library
 Name: %{SPECNAME}
-Version: 22.1.21
+Version: 22.5.23
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -48,7 +48,7 @@ make %{_smp_mflags}
 rm -rf $RPM_BUILD_ROOT
 
 %files
-%defattr(0664,root,root,0775)
+%defattr(0775,root,root,0775)
 %{_libdir}/lib%{LIBNAME}.so
 
 %package -n %{SPECNAME}-devel
@@ -74,6 +74,9 @@ FMI Tron library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon May 23 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.5.23-1.fmi
+- Fixed so-file to be executable
+
 * Fri Jan 21 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.1.21-1.fmi
 - Repackage due to upgrade of packages from PGDG repo: gdal-3.4, geos-3.10, proj-8.2
 
