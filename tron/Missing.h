@@ -25,14 +25,14 @@ struct NotMissing
 template <typename T>
 struct NanMissing
 {
-  static bool missing(T value) { return isnan(value); }
+  static bool missing(T value) { return std::isnan(value); }
 };
 
 // NaN and +-Inf are considered missing
 template <typename T>
 struct InfMissing
 {
-  static bool missing(T value) { return isinf(value) || isnan(value); }
+  static bool missing(T value) { return std::isinf(value) || std::isnan(value); }
 };
 
 // FMI specific case is stateless to avoid creation costs
