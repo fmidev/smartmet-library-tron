@@ -10,7 +10,14 @@ Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-tron
 Source0: %{name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot-%(%{__id_u} -n)
-BuildRequires: boost169-devel
+
+%if 0%{?rhel} && 0%{rhel} < 9
+%define smartmet_boost boost169
+%else
+%define smartmet_boost boost
+%endif
+
+BuildRequires: %{smartmet_boost}-devel
 BuildRequires: gcc-c++
 %if %{defined el7}
 BuildRequires: devtoolset-7-gcc-c++
@@ -19,12 +26,12 @@ BuildRequires: devtoolset-7-gcc-c++
 BuildRequires: geos310-devel
 BuildRequires: make
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-macgyver-devel >= 21.1.21
+BuildRequires: smartmet-library-macgyver-devel >= 22.6.16
 Requires: geos310
 Provides: %{LIBNAME}
 Obsoletes: libsmartmet-tron < 17.1.4
 Obsoletes: libsmartmet-tron-debuginfo < 17.1.4
-#TestRequires: boost169-devel
+#TestRequires: %{smartmet_boost}-devel
 #TestRequires: gcc-c++
 #TestRequires: smartmet-library-macgyver-devel
 #TestRequires: smartmet-library-gis-devel
@@ -55,7 +62,7 @@ rm -rf $RPM_BUILD_ROOT
 Summary: FMI Tron library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME} = %{version}-%{release}
-BuildRequires: boost169-devel
+BuildRequires: %{smartmet_boost}-devel
 BuildRequires: gcc-c++
 %if %{defined el7}
 BuildRequires: devtoolset-7-gcc-c++
@@ -64,7 +71,7 @@ BuildRequires: devtoolset-7-gcc-c++
 BuildRequires: geos310-devel
 BuildRequires: make
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-macgyver-devel >= 21.1.21
+BuildRequires: smartmet-library-macgyver-devel >= 22.6.16
 
 %description -n %{SPECNAME}-devel
 FMI Tron library development files
