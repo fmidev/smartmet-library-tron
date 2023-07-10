@@ -26,7 +26,7 @@ BuildRequires: devtoolset-7-gcc-c++
 BuildRequires: geos311-devel
 BuildRequires: make
 BuildRequires: rpm-build
-BuildRequires: smartmet-utils-devel >= 23.7.10
+BuildRequires: smartmet-utils-devel >= 23.7.7
 BuildRequires: smartmet-library-macgyver-devel >= 22.6.16
 Requires: geos311
 Provides: %{LIBNAME}
