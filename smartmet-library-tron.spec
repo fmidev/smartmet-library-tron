@@ -23,18 +23,19 @@ BuildRequires: gcc-c++
 BuildRequires: devtoolset-7-gcc-c++
 #TestRequires: devtoolset-7-gcc-c++
 %endif
-BuildRequires: geos310-devel
+BuildRequires: geos311-devel
 BuildRequires: make
 BuildRequires: rpm-build
+BuildRequires: smartmet-utils-devel >= 23.7.10
 BuildRequires: smartmet-library-macgyver-devel >= 22.6.16
-Requires: geos310
+Requires: geos311
 Provides: %{LIBNAME}
 Obsoletes: libsmartmet-tron < 17.1.4
 Obsoletes: libsmartmet-tron-debuginfo < 17.1.4
 #TestRequires: %{smartmet_boost}-devel
 #TestRequires: gcc-c++
 #TestRequires: smartmet-library-macgyver-devel
-#TestRequires: smartmet-library-gis-devel
+#TestRequires: smartmet-library-gis-devel >= 23.7.10
 #TestRequires: smartmet-library-regression
 
 %description
@@ -68,7 +69,7 @@ BuildRequires: gcc-c++
 BuildRequires: devtoolset-7-gcc-c++
 #TestRequires: devtoolset-7-gcc-c++
 %endif
-BuildRequires: geos310-devel
+BuildRequires: geos311-devel
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-macgyver-devel >= 22.6.16
