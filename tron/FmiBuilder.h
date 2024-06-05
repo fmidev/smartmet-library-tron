@@ -46,8 +46,6 @@ l* Building utility for FMI.
 #include <boost/optional.hpp>
 #include <boost/utility.hpp>
 #include <geos/algorithm/CGAlgorithmsDD.h>
-#include <geos/geom/CoordinateArraySequence.h>
-#include <geos/geom/CoordinateSequenceFactory.h>
 #include <geos/geom/GeometryFactory.h>
 #include <geos/geom/LineString.h>
 #include <geos/geom/LinearRing.h>
@@ -663,7 +661,7 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
 
   if (!fillmode)
   {
-    std::vector<gg::LineString *> lines;
+    std::vector<std::unique_ptr<gg::LineString>> lines;
 
     for (std::size_t i = 0; i < polylines.size(); i++)
     {
@@ -673,26 +671,25 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
       for (typename Ring<Traits>::const_iterator it = polyline.begin(); it != polyline.end(); ++it)
         points.emplace_back(gg::Coordinate(it->first, it->second));
 
-      gg::CoordinateSequence *cl = new gg::CoordinateArraySequence();
+      std::unique_ptr<gg::CoordinateSequence> cl(new gg::CoordinateSequence);
       cl->setPoints(points);
 
-      gg::LineString *ls = itsFactory.createLineString(cl);
+      std::unique_ptr<gg::LineString> ls = itsFactory.createLineString(std::move(cl));
 
-      geos::io::WKTWriter writer;
-      lines.push_back(ls);
+      lines.emplace_back(std::move(ls));
     }
 
     if (lines.size() == 1)
     {
-      itsResult.reset(lines[0]);
+      itsResult = std::move(lines.front());
       lines.clear();
     }
     else
     {
-      auto *parts = new std::vector<geos::geom::Geometry *>;
-      for (const auto &line : lines)
-        parts->push_back(line);
-      itsResult.reset(itsFactory.createMultiLineString(parts));
+      std::vector<std::unique_ptr<geos::geom::Geometry>> parts;
+      for (auto &line : lines)
+        parts.emplace_back(std::move(line));
+      itsResult = std::move(itsFactory.createMultiLineString(std::move(parts)));
     }
     itsResult->normalize();
     validate(itsResult);
@@ -720,7 +717,7 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
   // A mapping from polyline index to shell index
   std::map<std::size_t, std::size_t> shellindexes;
 
-  std::vector<gg::LinearRing *> shells;
+  std::vector<std::unique_ptr<gg::LinearRing>> shells;
 
   for (std::size_t i = 0; i < polylines.size(); i++)
   {
@@ -740,20 +737,20 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
       for (typename Ring<Traits>::const_iterator it = polyline.begin(); it != polyline.end(); ++it)
         points.emplace_back(gg::Coordinate(it->first, it->second));
 
-      gg::CoordinateSequence *cl = new gg::CoordinateArraySequence();
+      std::unique_ptr<gg::CoordinateSequence> cl(new gg::CoordinateSequence());
       cl->setPoints(points);
 
-      gg::LinearRing *lr = itsFactory.createLinearRing(cl);
+      std::unique_ptr<gg::LinearRing> lr = std::move(itsFactory.createLinearRing(std::move(cl)));
 
       shellindexes[i] = shells.size();
-      shells.push_back(lr);
+      shells.emplace_back(std::move(lr));
     }
   }
 
   // Assign holes to shells
 
   std::map<std::size_t, std::vector<std::size_t> > shellholes;
-  std::vector<gg::LinearRing *> holes;
+  std::vector<std::unique_ptr<gg::LinearRing>> holes;
 
   for (std::size_t i = 0; i < polylines.size(); i++)
   {
@@ -787,55 +784,53 @@ inline void FmiBuilder::build(const Edges &edges, bool fillmode)
              ++it)
           points.emplace_back(gg::Coordinate(it->first, it->second));
 
-        gg::CoordinateSequence *cl = new gg::CoordinateArraySequence();
+        std::unique_ptr<gg::CoordinateSequence> cl(new gg::CoordinateSequence());
         cl->setPoints(points);
 
-        gg::LinearRing *lr = itsFactory.createLinearRing(cl);
+        std::unique_ptr<gg::LinearRing> lr = std::move(itsFactory.createLinearRing(std::move(cl)));
 
-        holes.push_back(lr);
+        holes.push_back(std::move(lr));
       }
     }
   }
 
   // The built polygons
 
-  auto *geom = new std::vector<gg::Geometry *>;
+  std::vector<std::unique_ptr<gg::Geometry>> geom;
 
   if (holes.empty())
   {
-    for (const auto &shell : shells)
-      geom->push_back(itsFactory.createPolygon(shell, nullptr));
+    for (auto &shell : shells)
+      geom.emplace_back(std::move(itsFactory.createPolygon(std::move(shell))));
   }
   else
   {
     for (std::size_t i = 0; i < shells.size(); i++)
     {
-      std::vector<gg::LinearRing *> *holetransfer = nullptr;
+      std::vector<std::unique_ptr<gg::LinearRing>> holetransfer;
 
       const std::vector<std::size_t> &holeindexes = shellholes[i];
 
       for (auto holeindex : holeindexes)
       {
-        if (!holetransfer)
-          holetransfer = new std::vector<gg::LinearRing *>;
-        holetransfer->push_back(holes[holeindex]);
+        holetransfer.emplace_back(std::move(holes[holeindex]));
       }
-      auto &&foo = itsFactory.createPolygon(shells[i], holetransfer);
-      geom->push_back(foo);
+      std::unique_ptr<gg::Polygon> foo
+        = std::move(itsFactory.createPolygon(std::move(shells[i]), std::move(holetransfer)));
+      geom.emplace_back(std::move(foo));
     }
   }
 
   // Create a MULTIPOLYGON if required
-  gg::Geometry *multipolygon = nullptr;
-  if (geom->size() == 1)
+  std::unique_ptr<gg::Geometry> multipolygon;
+  if (geom.size() == 1)
   {
-    multipolygon = (*geom)[0];
-    delete geom;
+    multipolygon = std::move(geom.front());
   }
   else
-    multipolygon = itsFactory.createMultiPolygon(geom);
+    multipolygon = std::move(itsFactory.createMultiPolygon(std::move(geom)));
 
-  itsResult.reset(multipolygon);
+  itsResult = std::move(multipolygon);
   itsResult->normalize();
   validate(itsResult);
 }
