@@ -42,7 +42,6 @@ l* Building utility for FMI.
 
 #include "Ring.h"
 #include "SmallVector.h"
-#include <boost/foreach.hpp>
 #include <optional>
 #include <boost/utility.hpp>
 #include <geos/algorithm/CGAlgorithmsDD.h>

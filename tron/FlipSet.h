@@ -22,7 +22,6 @@
 
 #pragma once
 
-#include <boost/foreach.hpp>
 #include <algorithm>
 #include <utility>
 
