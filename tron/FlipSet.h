@@ -22,7 +22,6 @@
 
 #pragma once
 
-#include <boost/foreach.hpp>
 #include <algorithm>
 #include <utility>
 
@@ -84,7 +83,7 @@ class FlipSet
   void prepare()
   {
     itsValues.reserve(itsFlipValues.size());
-    BOOST_FOREACH (const value_type& value, itsFlipValues)
+    for (const value_type& value : itsFlipValues)
       itsValues.push_back(value);
     sort(itsValues.begin(), itsValues.end());
   }

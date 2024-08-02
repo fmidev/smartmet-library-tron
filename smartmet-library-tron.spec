@@ -23,7 +23,7 @@ BuildRequires: geos312-devel
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: smartmet-utils-devel >= 23.7.7
-BuildRequires: smartmet-library-macgyver-devel >= 23.7.28
+BuildRequires: smartmet-library-macgyver-devel >= 24.7.12
 Requires: geos312
 Provides: %{LIBNAME}
 Obsoletes: libsmartmet-tron < 17.1.4
@@ -31,7 +31,7 @@ Obsoletes: libsmartmet-tron-debuginfo < 17.1.4
 #TestRequires: %{smartmet_boost}-devel
 #TestRequires: gcc-c++
 #TestRequires: smartmet-library-macgyver-devel
-#TestRequires: smartmet-library-gis-devel >= 23.7.10
+#TestRequires: smartmet-library-gis-devel >= 24.7.12
 #TestRequires: smartmet-library-regression
 
 %description
@@ -68,7 +68,7 @@ BuildRequires: devtoolset-7-gcc-c++
 BuildRequires: geos312-devel
 BuildRequires: make
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-macgyver-devel >= 23.7.28
+BuildRequires: smartmet-library-macgyver-devel >= 24.7.12
 
 %description -n %{SPECNAME}-devel
 FMI Tron library development files
@@ -78,6 +78,12 @@ FMI Tron library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Jul 22 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.7.22-1.fmi
+- Replace BOOST_FOREACH and boost::array
+
+* Fri Jul 12 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.7.12-1.fmi
+- Replace many boost library types with C++ standard library ones
+
 * Fri Jul 28 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.7.28-1.fmi
 - Repackage due to bulk ABI changes in macgyver/newbase/spine
 

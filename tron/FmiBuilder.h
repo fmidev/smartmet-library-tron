@@ -42,8 +42,7 @@ l* Building utility for FMI.
 
 #include "Ring.h"
 #include "SmallVector.h"
-#include <boost/foreach.hpp>
-#include <boost/optional.hpp>
+#include <optional>
 #include <boost/utility.hpp>
 #include <geos/algorithm/CGAlgorithmsDD.h>
 #include <geos/geom/GeometryFactory.h>
@@ -383,7 +382,7 @@ std::size_t representative_edge(const Edges &edges, const EdgeIndexes &edgeindex
 // ----------------------------------------------------------------------
 
 template <typename Edges>
-boost::optional<std::size_t> find_shell(const Targets &targets,
+std::optional<std::size_t> find_shell(const Targets &targets,
                                         const Edges &edges,
                                         std::size_t edgeindex,
                                         std::size_t holeindex,

@@ -58,7 +58,6 @@
 #include "FlipSet.h"
 #include "Hints.h"
 #include "Missing.h"
-#include <boost/foreach.hpp>
 #include <string>
 
 namespace Tron
