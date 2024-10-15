@@ -43,6 +43,7 @@ l* Building utility for FMI.
 #include "Ring.h"
 #include "SmallVector.h"
 #include <optional>
+#include <boost/numeric/conversion/cast.hpp>
 #include <boost/utility.hpp>
 #include <geos/algorithm/CGAlgorithmsDD.h>
 #include <geos/geom/GeometryFactory.h>
