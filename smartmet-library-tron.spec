@@ -19,12 +19,12 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot-%(%{__id_u} -n)
 
 BuildRequires: %{smartmet_boost}-devel
 BuildRequires: gcc-c++
-BuildRequires: geos312-devel
+BuildRequires: geos313-devel
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: smartmet-utils-devel >= 24.8.7
 BuildRequires: smartmet-library-macgyver-devel >= 24.8.7
-Requires: geos312
+Requires: geos313
 Provides: %{LIBNAME}
 Obsoletes: libsmartmet-tron < 17.1.4
 Obsoletes: libsmartmet-tron-debuginfo < 17.1.4
@@ -65,7 +65,7 @@ BuildRequires: gcc-c++
 BuildRequires: devtoolset-7-gcc-c++
 #TestRequires: devtoolset-7-gcc-c++
 %endif
-BuildRequires: geos312-devel
+BuildRequires: geos313-devel
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-macgyver-devel >= 24.8.7
