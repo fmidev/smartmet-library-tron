@@ -22,8 +22,8 @@ BuildRequires: gcc-c++
 BuildRequires: geos313-devel
 BuildRequires: make
 BuildRequires: rpm-build
-BuildRequires: smartmet-utils-devel >= 24.8.7
-BuildRequires: smartmet-library-macgyver-devel >= 24.8.7
+BuildRequires: smartmet-utils-devel >= 25.2.18
+BuildRequires: smartmet-library-macgyver-devel >= 25.2.18
 Requires: geos313
 Provides: %{LIBNAME}
 Obsoletes: libsmartmet-tron < 17.1.4
@@ -31,7 +31,7 @@ Obsoletes: libsmartmet-tron-debuginfo < 17.1.4
 #TestRequires: %{smartmet_boost}-devel
 #TestRequires: gcc-c++
 #TestRequires: smartmet-library-macgyver-devel
-#TestRequires: smartmet-library-gis-devel >= 24.8.7
+#TestRequires: smartmet-library-gis-devel >= 25.2.18
 #TestRequires: smartmet-library-regression
 
 %description
@@ -68,7 +68,7 @@ BuildRequires: devtoolset-7-gcc-c++
 BuildRequires: geos313-devel
 BuildRequires: make
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-macgyver-devel >= 24.8.7
+BuildRequires: smartmet-library-macgyver-devel >= 25.2.18
 
 %description -n %{SPECNAME}-devel
 FMI Tron library development files
