@@ -127,7 +127,7 @@ workflows:
           context: fmi-global
           requires:
             - test-rhel8
-      - build-rhel10:
+      - build-rhel10
       - test-rhel10:
           requires:
             - build-rhel10
