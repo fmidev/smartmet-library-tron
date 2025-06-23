@@ -128,8 +128,6 @@ workflows:
           requires:
             - test-rhel8
       - build-rhel10:
-          requires:
-            - build-rhel8
       - test-rhel10:
           requires:
             - build-rhel10
